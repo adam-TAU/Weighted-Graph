@@ -142,13 +142,13 @@ public class Graph {
      */
     public class HashMap<V>{
         private int p; // the prime number of the Hash function
-        private hashNode<V>[] table;
+        private hashCell<V>[] table;
         private int a;
         private int b;
 
         public HashMap(Node[] nodes, float loadFactor){
             p = (int)Math.pow(10, 9) + 9;
-            table = new hashNode[(int)((float)nodes.length*loadFactor)];
+            table = new hashCell[(int)((float)nodes.length*loadFactor)];
             Random rand = new Random();
             a = rand.nextInt(p-1) + 1;
             b = rand.nextInt(p);
@@ -170,12 +170,12 @@ public class Graph {
          */
         public void addItem(int key, V item){
             int hashedKey = hash(key);
-            hashNode<V> curr = table[hashedKey];
+            hashCell<V> curr = table[hashedKey];
             if (curr == null) {
-                table[hashedKey] = new hashNode<V>(hashedKey, key, item, null);
+                table[hashedKey] = new hashCell<V>(hashedKey, key, item, null);
                 return;
             }
-            hashNode<V> newItem = new hashNode<V>(hashedKey, key, item, curr);
+            hashCell<V> newItem = new hashCell<V>(hashedKey, key, item, curr);
             while (curr.next != null) {
                 curr = curr.next;
             }
@@ -188,9 +188,9 @@ public class Graph {
          * @param key
          * @return
          */
-        public hashNode getNode(int key) {
+        public hashCell getNode(int key) {
             int hashedKey = hash(key);
-            hashNode<V> curr = table[hashedKey];
+            hashCell<V> curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
                     return curr;
@@ -207,8 +207,8 @@ public class Graph {
          */
         public int removeNode(int key) {
             int hashedKey = hash(key);
-            hashNode<V> prev = null;
-            hashNode<V> curr = table[hashedKey];
+            hashCell<V> prev = null;
+            hashCell<V> curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
                     if (prev != null){
@@ -229,21 +229,45 @@ public class Graph {
          * The Cell holds a pointer to the actual node in the Graph that has the given key, and in addition, holds a pointer to its cell in the Maximum-Heap.
          * @param <V>
          */
-        public class hashNode<V>{
+        public class hashCell<V>{
             private final int hash;
             private final int key;
             private V value;
-            private hashNode<V> next;
+            private hashCell<V> next;
 
-            public hashNode(int hash, int key, V value, hashNode<V> next) {
+            /**
+             * the constructor of a Cell in the Hash-Map.
+             * @param hash
+             * @param key
+             * @param value
+             * @param next
+             */
+            public hashCell(int hash, int key, V value, hashCell<V> next) {
                 this.hash = hash;
                 this.key = key;
                 this.value = value;
                 this.next = next;
             }
 
+
+            /**
+             * the cell's key's getter
+             * @return
+             */
             public int getKey() { return this.key; }
+
+
+            /**
+             * the cell's value's getter
+             * @return
+             */
             public V getValue() { return this.value; }
+
+
+            /**
+             * the cell's value's setter
+             * @param newValue
+             */
             public void setValue(V newValue){ value = newValue; }
 
         }
@@ -270,6 +294,7 @@ public class Graph {
         public int addNode(V node) {
             int key = calculateKey(node);
             //TODO: implement this func
+            return 0;
         }
 
         /**
@@ -280,6 +305,7 @@ public class Graph {
          */
         private int calculateKey(V node) {
             //TODO: implement this func
+            return 0;
         }
 
 
@@ -305,7 +331,7 @@ public class Graph {
                 this.value = node;
             }
 
-            
+
             /**
              * the node's key's getter
              * @return
