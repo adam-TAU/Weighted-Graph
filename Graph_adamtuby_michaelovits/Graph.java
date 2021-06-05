@@ -4,12 +4,15 @@ You are required to implement the methods of this skeleton file according to the
 You are allowed to add classes, methods, and members as required.
  */
 
+import java.util.HashMap;
+
 /**
  * This class represents a graph that efficiently maintains the heaviest neighborhood over edge addition and
  * vertex deletion.
  *
  */
 public class Graph {
+    private HashMap<Node> Nodes;
     /**
      * Initializes the graph on a given set of nodes. The created graph is empty, i.e. it has no edges.
      * You may assume that the ids of distinct nodes are distinct.
@@ -17,6 +20,7 @@ public class Graph {
      * @param nodes - an array of node objects
      */
     public Graph(Node [] nodes){
+        Nodes = new HashMap<>(nodes, 1);
         //TODO: implement this method.
     }
 
@@ -73,14 +77,18 @@ public class Graph {
      * This class represents a node in the graph.
      */
     public class Node{
+        private int id;
+        private long weight;
+        private DoublyLinkedList<Node> Neighbours;
         /**
          * Creates a new node object, given its id and its weight.
          * @param id - the id of the node.
          * @param weight - the weight of the node.
          */
         public Node(int id, int weight){
-            //TODO: implement this method.
-            return;
+            this.id = id;
+            this.weight = weight;
+            Neighbours = new DoublyLinkedList<>();
         }
 
         /**
@@ -88,8 +96,7 @@ public class Graph {
          * @return the id of the node.
          */
         public int getId(){
-            //TODO: implement this method.
-            return 0;
+            return id;
         }
 
         /**
@@ -100,7 +107,154 @@ public class Graph {
             //TODO: implement this method.
             return 0;
         }
+
+        /**
+         * Updates the weight of the Node in case a new Neightbour was added
+         */
+        public void updateWeight(){
+            // update the weight of the node
+        }
     }
+
+    public class Edge{
+        private int i;
+        private int j;
+
+        public Edge(int i, int j){
+            this.i = i;
+            this.j = j;
+        }
+
+        //TODO: implement this class;
+    }
+
+
+    public class DoublyLinkedList<T>{
+        //TODO: implement this class;
+    }
+
+    /**
+     * a HashMap maping from keys: K to values: V using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
+     * K is set to default as Integer since it makes the implementation easier
+     * @param <V>
+     */
+    public class HashMap<V>{
+        private int p; // the prime number of the Hash function
+        private hashNode<V>[] table;
+
+        public HashMap(Node[] nodes, float loadFactor){
+            p = (int)Math.pow(10, 9) + 9;
+            table = new hashNode[nodes.length];
+            //TODO: implement this method;
+            return;
+        }
+
+        /**
+         * the hash function of the HashMap
+         * @return
+         */
+        protected final int hash(int key){
+            //TODO: implement this method;
+            return 0;
+        }
+
+
+        /**
+         * a method used to add a new item to the Hash Map. this method would be used only amongst the class's constructor,
+         * due to its simplicity of use and due to the project's needs.
+         * @param key
+         * @param item
+         */
+        public void addItem(int key, V item){
+            int hashedKey = hash(key);
+            hashNode<V> curr = table[hashedKey];
+            if (curr == null) {
+                table[hashedKey] = new hashNode<V>(hashedKey, key, item, null);
+                return;
+            }
+            hashNode<V> newItem = new hashNode<V>(hashedKey, key, item, curr);
+            while (curr.next != null) {
+                curr = curr.next;
+            }
+            curr.next = newItem;
+        }
+
+
+        /**
+         * returns the node in the hashMap who holds the given key
+         * @param key
+         * @return
+         */
+        public hashNode getNode(int key) {
+            int hashedKey = hash(key);
+            hashNode<V> curr = table[hashedKey];
+            while (curr != null) {
+                if (curr.key == key){
+                    return curr;
+                }
+                curr = curr.next;
+            }
+            return null;
+        }
+
+
+        /**
+         * removes the node in the hashMap who holds the given key. if the node isn't in the map, return -1, else, return 1.
+         * @param key
+         */
+        public int removeNode(int key) {
+            int hashedKey = hash(key);
+            hashNode<V> prev = null;
+            hashNode<V> curr = table[hashedKey];
+            while (curr != null) {
+                if (curr.key == key){
+                    if (prev != null){
+                        prev.next = curr.next;
+                    } else {
+                        table[hashedKey] = curr.next;
+                    }
+                    return 1;
+                }
+                prev = curr;
+                curr = curr.next;
+            }
+            return -1;
+        }
+
+        /**
+         * the class used to implement the Cell class of the items in the Hash Map.
+         * The Cell holds a pointer to the actual node in the Graph that has the given key, and in addition, holds a pointer to its cell in the Maximum-Heap.
+         * @param <V>
+         */
+        public class hashNode<V>{
+            private final int hash;
+            private final int key;
+            private V value;
+            private hashNode<V> next;
+
+            public hashNode(int hash, int key, V value, hashNode<V> next) {
+                this.hash = hash;
+                this.key = key;
+                this.value = value;
+                this.next = next;
+            }
+
+            public int getKey() { return this.key; }
+            public V getValue() { return this.value; }
+            public void setValue(V newValue){ value = newValue; }
+
+        }
+    }
+
+    /**
+     * Maximum Heap containing cells T
+     */
+    public class maxHeap{
+        //TODO: implement this class;
+    }
+
+
+
 }
 
 
