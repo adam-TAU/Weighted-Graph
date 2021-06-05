@@ -81,6 +81,7 @@ public class Graph {
         private int id;
         private long weight;
         private DoublyLinkedList<Node> Neighbours;
+
         /**
          * Creates a new node object, given its id and its weight.
          * @param id - the id of the node.
@@ -147,7 +148,7 @@ public class Graph {
 
         public HashMap(Node[] nodes, float loadFactor){
             p = (int)Math.pow(10, 9) + 9;
-            table = new hashNode[nodes.length];
+            table = new hashNode[(int)((float)nodes.length*loadFactor)];
             Random rand = new Random();
             a = rand.nextInt(p-1) + 1;
             b = rand.nextInt(p);
@@ -201,7 +202,7 @@ public class Graph {
 
 
         /**
-         * removes the node in the hashMap who holds the given key. if the node isn't in the map, return -1, else, return 1.
+         * removes the node in the hashMap who holds the given key. if the node isn't in the map, return -1
          * @param key
          */
         public int removeNode(int key) {
@@ -251,7 +252,124 @@ public class Graph {
     /**
      * Maximum Heap containing cells T
      */
-    public class maxHeap{
+    public class maxHeap<V>{
+        // this will hold the pointer to the top node in the heap, thus, the node with the biggest key in the heap.
+        private heapNode<V> top;
+
+        /**
+         * the constructor of the Maximum-Heap
+         */
+        public maxHeap(){
+
+        }
+
+        /**
+         * this method is used to add a node into the heap. if the node has a key which already exists in the heap, return -1
+         * @param node
+         */
+        public int addNode(V node) {
+            int key = calculateKey(node);
+            //TODO: implement this func
+        }
+
+        /**
+         * used to calculate the sum of all the weights of the neighbours of @node, and the weight of @node itself.
+         * This is basically the method to calculate the key of the node we want to insert.
+         * @param node
+         * @return
+         */
+        private int calculateKey(V node) {
+            //TODO: implement this func
+        }
+
+
+        /**
+         * the class used to implement the nodes of the Maximum-Heap.
+         * @param <V>
+         */
+        public class heapNode<V>{
+            private int key;
+            private V value;
+            private heapNode parent;
+            private heapNode leftChild;
+            private heapNode rightChild;
+
+
+            /**
+             * the constructor of the Heap's node.
+             * @param key
+             * @param node
+             */
+            public heapNode(int key, V node){
+                this.key = key;
+                this.value = node;
+            }
+
+            
+            /**
+             * the node's key's getter
+             * @return
+             */
+            public int getKey() {
+                return key;
+            }
+
+
+            /**
+             * the node's parent's getter
+             * @return
+             */
+            public heapNode getParent() {
+                return parent;
+            }
+
+
+            /**
+             * the node's left Child's getter
+             * @return
+             */
+            public heapNode getLeftChild() {
+                return leftChild;
+            }
+
+
+            /**
+             * the node's right Child's getter
+             * @return
+             */
+            public heapNode getRightChild() {
+                return rightChild;
+            }
+
+
+            /**
+             * the node's right Child's setter
+             * @param rightChild
+             */
+            public void setRightChild(heapNode rightChild) {
+                this.rightChild = rightChild;
+            }
+
+
+            /**
+             * the node's left Child's setter
+             * @param leftChild
+             */
+            public void setLeftChild(heapNode leftChild) {
+                this.leftChild = leftChild;
+            }
+
+
+            /**
+             * the node's parent's setter
+             * @param parent
+             */
+            public void setParent(heapNode parent) {
+                this.parent = parent;
+            }
+
+
+        }
         //TODO: implement this class;
     }
 
