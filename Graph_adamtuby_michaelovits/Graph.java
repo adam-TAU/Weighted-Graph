@@ -5,6 +5,7 @@ You are allowed to add classes, methods, and members as required.
  */
 
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * This class represents a graph that efficiently maintains the heaviest neighborhood over edge addition and
@@ -134,18 +135,22 @@ public class Graph {
     }
 
     /**
-     * a HashMap maping from keys: K to values: V using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
+     * a HashMap mapping from keys: K to values: V using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
      * K is set to default as Integer since it makes the implementation easier
      * @param <V>
      */
     public class HashMap<V>{
         private int p; // the prime number of the Hash function
         private hashNode<V>[] table;
+        private int a;
+        private int b;
 
         public HashMap(Node[] nodes, float loadFactor){
             p = (int)Math.pow(10, 9) + 9;
             table = new hashNode[nodes.length];
-            //TODO: implement this method;
+            Random rand = new Random();
+            a = rand.nextInt(p);
+            b = rand.nextInt(p-1) + 1;
             return;
         }
 
@@ -153,10 +158,7 @@ public class Graph {
          * the hash function of the HashMap
          * @return
          */
-        protected final int hash(int key){
-            //TODO: implement this method;
-            return 0;
-        }
+        private int hash(int key) { return Math.floorMod(a*key+b, p); }
 
 
         /**
