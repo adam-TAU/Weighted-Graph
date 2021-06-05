@@ -4,7 +4,6 @@ You are required to implement the methods of this skeleton file according to the
 You are allowed to add classes, methods, and members as required.
  */
 
-import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -13,7 +12,7 @@ import java.util.Random;
  *
  */
 public class Graph {
-    private HashMap<Node> Nodes;
+    private hashMap<Node> Nodes;
     /**
      * Initializes the graph on a given set of nodes. The created graph is empty, i.e. it has no edges.
      * You may assume that the ids of distinct nodes are distinct.
@@ -21,7 +20,7 @@ public class Graph {
      * @param nodes - an array of node objects
      */
     public Graph(Node [] nodes){
-        Nodes = new HashMap<>(nodes, 1);
+        Nodes = new hashMap<Node>(nodes, 1);
         //TODO: implement this method.
     }
 
@@ -79,7 +78,8 @@ public class Graph {
      */
     public class Node{
         private int id;
-        private long weight;
+        private int weight;
+        private int totalWeight;
         private DoublyLinkedList<Node> Neighbours;
 
         /**
@@ -90,6 +90,7 @@ public class Graph {
         public Node(int id, int weight){
             this.id = id;
             this.weight = weight;
+            totalWeight = weight;
             Neighbours = new DoublyLinkedList<>();
         }
 
@@ -106,47 +107,110 @@ public class Graph {
          * @return the weight of the node.
          */
         public int getWeight(){
-            //TODO: implement this method.
-            return 0;
+            return weight;
         }
 
         /**
-         * Updates the weight of the Node in case a new Neightbour was added
+         * Updates the weight of the Node in case a new edge was added/deleted
          */
-        public void updateWeight(){
-            // update the weight of the node
+        public void updateTotalWeight(int additionalWeight){
+            totalWeight += additionalWeight;
         }
     }
 
     public class Edge{
         private int i;
         private int j;
+        private Edge Parallel;
 
-        public Edge(int i, int j){
+        public Edge(int i, int j, boolean isParallel){
             this.i = i;
             this.j = j;
+            if (!isParallel) {
+                Parallel = new Edge(j, i, true); // TODO: unsure how much this satisfies the assignment's requirements
+            }
+
         }
 
-        //TODO: implement this class;
+        //TODO: fully implement this class;
     }
 
 
     public class DoublyLinkedList<T>{
-        //TODO: implement this class;
+        private DoublyLinkedCell tail;
+        private DoublyLinkedCell head;
+
+        /**
+         * this method is used to add a new item to the Doubly Linked List
+         * @param item
+         */
+        public void addItem(T item){
+            DoublyLinkedCell curr = this.head;
+            DoublyLinkedCell newCell = new DoublyLinkedCell(item);
+
+            if (curr == null) {
+                this.head = newCell;
+                return;
+            }
+
+            this.tail = newCell;
+            while (curr.next != null) {
+                curr = curr.next;
+            }
+            curr.next = newCell;
+            newCell.prev = curr;
+        }
+
+
+        /**
+         * this method is used to delete an item from the Doubly Linked List
+         * @param item
+         */
+        public void deleteItem(T item){
+            DoublyLinkedCell curr = this.head;
+            while (curr != null) {
+                if (curr.item == item) {
+                    DoublyLinkedCell Prev = curr.prev;
+                    DoublyLinkedCell Next = curr.next;
+
+                    if (Prev == null || Next == null) {
+                        if (Prev == null) {
+                            this.head = curr.next;
+                        }
+                        if (Next == null) {
+                            this.tail = curr.prev;
+                        }
+                    } else {
+                        Prev.next = Next;
+                        Next.prev = Prev;
+                    }
+                }
+            }
+        }
+
+        public class DoublyLinkedCell{
+            private DoublyLinkedCell next;
+            private DoublyLinkedCell prev;
+            private T item;
+
+            public DoublyLinkedCell(T item) {
+                this.item = item;
+            }
+        }
     }
 
     /**
-     * a HashMap mapping from keys: K to values: V using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
+     * a hashMap mapping from keys: K to values: V using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
      * K is set to default as Integer since it makes the implementation easier
      * @param <V>
      */
-    public class HashMap<V>{
+    public class hashMap<V>{
         private int p; // the prime number of the Hash function
         private hashCell<V>[] table;
         private int a;
         private int b;
 
-        public HashMap(Node[] nodes, float loadFactor){
+        public hashMap(Node[] nodes, float loadFactor){
             p = (int)Math.pow(10, 9) + 9;
             table = new hashCell[(int)((float)nodes.length*loadFactor)];
             Random rand = new Random();
@@ -156,7 +220,7 @@ public class Graph {
         }
 
         /**
-         * the hash function of the HashMap
+         * the hash function of the hashMap
          * @return
          */
         private int hash(int key) { return Math.floorMod(a*key+b, p); }
@@ -276,125 +340,68 @@ public class Graph {
     /**
      * Maximum Heap containing cells T
      */
-    public class maxHeap<V>{
+    public class maxHeap{
         // this will hold the pointer to the top node in the heap, thus, the node with the biggest key in the heap.
-        private heapNode<V> top;
+        private heapNode head;
 
         /**
          * the constructor of the Maximum-Heap
          */
-        public maxHeap(){
-
-        }
+        public maxHeap(){}
 
         /**
          * this method is used to add a node into the heap. if the node has a key which already exists in the heap, return -1
          * @param node
          */
-        public int addNode(V node) {
-            int key = calculateKey(node);
+        public int addNode(Node node) {
+            heapNode newNode = new heapNode(node.totalWeight, node);
+            heapNode curr = this.head;
+            if (curr == null){
+                head = newNode;
+                return 0;
+            }
+
             //TODO: implement this func
             return 0;
+        }
+
+
+
+        /**
+         * used to Heapify @node UP when required in order to sustain the requirements of a Maximum-Heap
+         * @param node
+         */
+        public void HeapifyUp(heapNode node) {
+
         }
 
         /**
-         * used to calculate the sum of all the weights of the neighbours of @node, and the weight of @node itself.
-         * This is basically the method to calculate the key of the node we want to insert.
+         * used to Heapify @node DOWN when required in order to sustain the requirements of a Maximum-Heap
          * @param node
-         * @return
          */
-        private int calculateKey(V node) {
-            //TODO: implement this func
-            return 0;
-        }
+        public void HeapifyDown(heapNode node) {
 
+        }
 
         /**
          * the class used to implement the nodes of the Maximum-Heap.
-         * @param <V>
          */
-        public class heapNode<V>{
+        public class heapNode{
             private int key;
-            private V value;
+            private Node value;
             private heapNode parent;
             private heapNode leftChild;
             private heapNode rightChild;
-
 
             /**
              * the constructor of the Heap's node.
              * @param key
              * @param node
              */
-            public heapNode(int key, V node){
+            public heapNode(int key, Node node){
                 this.key = key;
                 this.value = node;
             }
-
-
-            /**
-             * the node's key's getter
-             * @return
-             */
-            public int getKey() {
-                return key;
-            }
-
-
-            /**
-             * the node's parent's getter
-             * @return
-             */
-            public heapNode getParent() {
-                return parent;
-            }
-
-
-            /**
-             * the node's left Child's getter
-             * @return
-             */
-            public heapNode getLeftChild() {
-                return leftChild;
-            }
-
-
-            /**
-             * the node's right Child's getter
-             * @return
-             */
-            public heapNode getRightChild() {
-                return rightChild;
-            }
-
-
-            /**
-             * the node's right Child's setter
-             * @param rightChild
-             */
-            public void setRightChild(heapNode rightChild) {
-                this.rightChild = rightChild;
-            }
-
-
-            /**
-             * the node's left Child's setter
-             * @param leftChild
-             */
-            public void setLeftChild(heapNode leftChild) {
-                this.leftChild = leftChild;
-            }
-
-
-            /**
-             * the node's parent's setter
-             * @param parent
-             */
-            public void setParent(heapNode parent) {
-                this.parent = parent;
-            }
-
-
         }
         //TODO: implement this class;
     }
