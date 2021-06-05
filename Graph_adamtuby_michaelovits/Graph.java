@@ -149,8 +149,8 @@ public class Graph {
             p = (int)Math.pow(10, 9) + 9;
             table = new hashNode[nodes.length];
             Random rand = new Random();
-            a = rand.nextInt(p);
-            b = rand.nextInt(p-1) + 1;
+            a = rand.nextInt(p-1) + 1;
+            b = rand.nextInt(p);
             return;
         }
 
