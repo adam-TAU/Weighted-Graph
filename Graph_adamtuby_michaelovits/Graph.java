@@ -513,6 +513,11 @@ public class Graph {
          * @param pos2
          */
         private void swap(int pos1, int pos2){
+            // updating the new positions fields of the nodes given at the indices of the Heap's array - given as the arguments
+            Heap[pos1].setPos(pos2);
+            Heap[pos2].setPos(pos1);
+
+            // performing the swapping process
             heapNode tmp = Heap[pos1];
             Heap[pos1] = Heap[pos2];
             Heap[pos2] = tmp;
@@ -523,7 +528,7 @@ public class Graph {
          * @param node
          */
         public void addNode(Node node) {
-            Heap[size++] = new heapNode(node.vicinityWeight, node);
+            Heap[size++] = new heapNode(node.vicinityWeight, node, size);
             int curr = size;
 
             while (Heap[curr].key > Heap[parent(curr)].key) {
@@ -532,6 +537,37 @@ public class Graph {
             }
         }
 
+
+        /**
+         * this method is used to Heapify either UP or DOWN a node who has got its key changed.
+         * <p>
+         * this method is a recursive-wrapper-method to the recursive method: 'Heapify_Rec', which does the actual Heapifyingment.
+         * </p>
+         * @param node
+         */
+        public void Heapify(heapNode node) {
+            int pos = node.getPos();
+            Heapify_Rec(pos);
+        }
+
+
+        /**
+         * this is the recursive-method that 'Heapify' wraps.
+         * @param pos - the index at the Heap's array of the node we want to validate and Heapify.
+         */
+        private void Heapify_Rec(int pos){
+            if (Heap[pos].key < Heap[leftChild(pos)].key){
+                swap(pos, leftChild(pos));
+                Heapify_Rec(leftChild(pos));
+            } else if (Heap[pos].key < Heap[rightChild(pos)].key) {
+                swap(pos, rightChild(pos));
+                Heapify_Rec(rightChild(pos));
+            } else if (Heap[pos].key > Heap[parent(pos)].key) {
+                swap(pos, parent(pos));
+            } else {
+                return;
+            }
+        }
 
         /**
          * this method returns the "head" of the Heap, or in other words: the node in the Heap which holds the largest key.
@@ -552,10 +588,12 @@ public class Graph {
 
         /**
          * this method is used to change the key of an already existing node in the Heap.
-         * @param key
+         * @param node
          */
-        public void changeKey(int key){
-            //TODO: implement this method
+        public void changeKey(heapNode node, int key){
+            node.setKey(key);
+            Heapify(node);
+            //TODO: check validity of this method
         }
 
         /**
@@ -564,6 +602,7 @@ public class Graph {
         public class heapNode{
             private int key;
             private Node value;
+            private int pos;
             private heapNode parent;
             private heapNode leftChild;
             private heapNode rightChild;
@@ -573,9 +612,10 @@ public class Graph {
              * @param key
              * @param node
              */
-            public heapNode(int key, Node node){
+            public heapNode(int key, Node node, int pos){
                 this.key = key;
                 this.value = node;
+                this.pos = pos;
                 node.setHeapForm(this);
             }
 
@@ -602,6 +642,33 @@ public class Graph {
              */
             public Node getValue() {
                 return value;
+            }
+
+            /**
+             * this method is the 'setter' of the 'key' field of a heap-Node.
+             * this method will be used when we want to change the key of the given heap-Node/
+             * @param key - the new 'key' field's value
+             */
+            public void setKey(int key) {
+                this.key = key;
+            }
+
+
+            /**
+             * this method returns the position of the given heap-Node in the Heap's array
+             * @return
+             */
+            public int getPos() {
+                return pos;
+            }
+
+
+            /**
+             * this method sets the position of the given heap-Node in the Heap's array
+             * @param pos
+             */
+            public void setPos(int pos) {
+                this.pos = pos;
             }
         }
     }
