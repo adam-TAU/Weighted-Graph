@@ -26,13 +26,13 @@ public class Graph {
     public Graph(Node [] nodes){
         Nodes = nodes;
         nodesHash = new hashMap<Node>(nodes, 1);
-
-        for (Node node : nodes) { // adding all of the nodes to the Hash-Map
-            nodesHash.addItem(node.getId(), node);
-        }
-
         nodesHeap = new maxHeap(nodes.length);
-        //TODO: implement this method.
+
+        for (Node node : nodes) { // adding all of the nodes to the Hash-Map and to the Maximum-Heap
+            nodesHash.addItem(node.getId(), node);
+            nodesHeap.addNode(node);
+        }
+        //TODO: check the validity of this method
     }
 
     /**
@@ -60,7 +60,7 @@ public class Graph {
     public int getNeighborhoodWeight(int node_id){
         Node node = nodesHash.get(node_id);
         if (node != null) {
-            return node.getVicinityWeight()
+            return node.getVicinityWeight();
         }
         return -1;
     }
@@ -86,9 +86,14 @@ public class Graph {
             return false;
         }
 
+        // adding each node to the other's Neighbours list:
+        node1.addNeighbour(node2);
+        node2.addNeighbour(node1);
+
         Edge edge = new Edge(node1_id, node2_id, false);
+
         //TODO: add the Edge to the Graph
-        return false;
+        return true;
     }
 
     /**
@@ -109,6 +114,14 @@ public class Graph {
     }
 
 
+
+    public int getNumNodes(){
+        return nodesHeap.getSize();
+    }
+
+
+
+
     /**
      * this method is used to check if the Graph is empty or not
      * @return True if the amount of nodes in the Graph (Nodes.length) is 0.
@@ -125,6 +138,7 @@ public class Graph {
         private int weight;
         private int vicinityWeight;
         private DoublyLinkedList<Node> Neighbours;
+        private maxHeap.heapNode heapForm;
 
         /**
          * Creates a new node object, given its id and its weight.
@@ -168,6 +182,34 @@ public class Graph {
          */
         public void UpdateVicinityWeight(int additionalWeight){
             vicinityWeight += additionalWeight;
+        }
+
+        /**
+         * this method is used to add a new Neighbour, which is @node. In other words, this method is used to add a new Edge that consists of the original node and the given argument node
+         * @param node
+         */
+        public void addNeighbour(Node node){
+            Neighbours.addItem(node);
+            UpdateVicinityWeight(node.getWeight());
+        }
+
+
+        /**
+         * this method is used to add a Neighbour, which is @node. In other words, this method is used to delete an Edge that consists of the original node and the given node as an argument.
+         * @param node
+         */
+        public void deleteNeighbour(Node node){
+            Neighbours.deleteItem(node);
+            UpdateVicinityWeight(-node.getWeight());
+        }
+
+
+        /**
+         * this method is used to add as a new field - the pointer of the node's form in the Maximum-Heap of the Graph.
+         * @param heapForm - the pointer we update the field 'heapForm' to.
+         */
+        public void setHeapForm(maxHeap.heapNode heapForm) {
+            this.heapForm = heapForm;
         }
     }
 
@@ -501,6 +543,22 @@ public class Graph {
 
 
         /**
+         * this method is used to get the amount of nodes in the Heap, or in other words, the amount of nodes in the overall Graph.
+         * @return
+         */
+        public int getSize() {
+            return size;
+        }
+
+        /**
+         * this method is used to change the key of an already existing node in the Heap.
+         * @param key
+         */
+        public void changeKey(int key){
+            //TODO: implement this method
+        }
+
+        /**
          * the class used to implement the nodes of the Maximum-Heap.
          */
         public class heapNode{
@@ -518,6 +576,7 @@ public class Graph {
             public heapNode(int key, Node node){
                 this.key = key;
                 this.value = node;
+                node.setHeapForm(this);
             }
 
 
