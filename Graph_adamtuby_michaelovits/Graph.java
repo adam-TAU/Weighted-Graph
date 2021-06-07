@@ -13,7 +13,10 @@ import java.util.Random;
  *
  */
 public class Graph {
-    private hashMap<Node> Nodes;
+    private hashMap<Node> nodesHash;
+    private maxHeap nodesHeap;
+    private Node[] Nodes;
+
     /**
      * Initializes the graph on a given set of nodes. The created graph is empty, i.e. it has no edges.
      * You may assume that the ids of distinct nodes are distinct.
@@ -21,18 +24,30 @@ public class Graph {
      * @param nodes - an array of node objects
      */
     public Graph(Node [] nodes){
-        Nodes = new hashMap<Node>(nodes, 1);
+        Nodes = nodes;
+        nodesHash = new hashMap<Node>(nodes, 1);
+
+        for (Node node : nodes) { // adding all of the nodes to the Hash-Map
+            nodesHash.addItem(node.getId(), node);
+        }
+
+        nodesHeap = new maxHeap(nodes.length);
         //TODO: implement this method.
     }
 
     /**
      * This method returns the node in the graph with the maximum neighborhood weight.
      * Note: nodes that have been removed from the graph using deleteNode are no longer in the graph.
+     * <p>
+     * this method takes O(1), since extracting the Maximum-node (the top node) of a Maximum Heap costs O(1)
+     * </p>
      * @return a Node object representing the correct node. If there is no node in the graph, returns 'null'.
      */
     public Node maxNeighborhoodWeight(){
-        //TODO: implement this method.
-        return null;
+        if (this.isEmpty()) {
+            return null;
+        }
+        return nodesHeap.getMax().getValue();
     }
 
     /**
@@ -43,9 +58,13 @@ public class Graph {
      * Otherwise, the function returns -1.
      */
     public int getNeighborhoodWeight(int node_id){
-        //TODO: implement this method.
-        return 0;
+        Node node = nodesHash.get(node_id);
+        if (node != null) {
+            return node.getVicinityWeight()
+        }
+        return -1;
     }
+
 
     /**
      * This function adds an edge between the two nodes whose ids are specified.
@@ -58,7 +77,17 @@ public class Graph {
      * @return returns 'true' if the function added an edge, otherwise returns 'false'.
      */
     public boolean addEdge(int node1_id, int node2_id){
-        //TODO: implement this method.
+        Node node1 = nodesHash.get(node1_id);
+        Node node2 = nodesHash.get(node2_id);
+
+        if (node1 == null || node2 == null) {
+            return false;
+        } else if (node1_id == node2_id) {
+            return false;
+        }
+
+        Edge edge = new Edge(node1_id, node2_id, false);
+        //TODO: add the Edge to the Graph
         return false;
     }
 
@@ -69,10 +98,24 @@ public class Graph {
      * @return returns 'true' if the function deleted a node, otherwise returns 'false'
      */
     public boolean deleteNode(int node_id){
-        //TODO: implement this method.
+        Node node = nodesHash.get(node_id);
+
+        if (node == null) {
+            return false;
+        }
+
+        // TODO: delete it from the Graph
         return false;
     }
 
+
+    /**
+     * this method is used to check if the Graph is empty or not
+     * @return True if the amount of nodes in the Graph (Nodes.length) is 0.
+     */
+    public boolean isEmpty(){
+        return Nodes.length == 0;
+    }
 
     /**
      * This class represents a node in the graph.
@@ -80,7 +123,7 @@ public class Graph {
     public class Node{
         private int id;
         private int weight;
-        private int totalWeight;
+        private int vicinityWeight;
         private DoublyLinkedList<Node> Neighbours;
 
         /**
@@ -91,7 +134,7 @@ public class Graph {
         public Node(int id, int weight){
             this.id = id;
             this.weight = weight;
-            totalWeight = weight;
+            vicinityWeight = weight;
             Neighbours = new DoublyLinkedList<>();
         }
 
@@ -112,11 +155,19 @@ public class Graph {
             return weight;
         }
 
+
+        /**
+         * returns the vicinityWeight of the given node
+         */
+        public int getVicinityWeight() {
+            return vicinityWeight;
+        }
+
         /**
          * Updates the weight of the Node in case a new edge was added/deleted
          */
-        public void updateTotalWeight(int additionalWeight){
-            totalWeight += additionalWeight;
+        public void UpdateVicinityWeight(int additionalWeight){
+            vicinityWeight += additionalWeight;
         }
     }
 
@@ -144,28 +195,40 @@ public class Graph {
 
         /**
          * this method is used to add a new item to the Doubly Linked List
+         * <p>
+         * this method has a time-Complexity of O(1)
+         * </p>
          * @param item
          */
         public void addItem(T item){
             DoublyLinkedCell curr = this.head;
             DoublyLinkedCell newCell = new DoublyLinkedCell(item);
 
-            if (curr == null) {
+            if (curr == null) { // this is true if and only if the List is empty
                 this.head = newCell;
+                this.tail = newCell;
+                newCell.prev = newCell;
+                newCell.next = newCell;
                 return;
             }
 
+            // inserting the item at the tail of the List
+            curr = this.tail;
             this.tail = newCell;
-            while (curr.next != null) {
-                curr = curr.next;
-            }
             curr.next = newCell;
             newCell.prev = curr;
+
+            // since the item was inserted at the tail of the List, we now need to update its following cell to be the head of the List
+            newCell.next = this.head;
+            this.head.prev = newCell;
         }
 
 
         /**
          * this method is used to delete an item from the Doubly Linked List
+         * <p>
+         * performed in O(n), while n is the length of the List
+         * </p>
          * @param item
          */
         public void deleteItem(T item){
@@ -175,17 +238,22 @@ public class Graph {
                     DoublyLinkedCell Prev = curr.prev;
                     DoublyLinkedCell Next = curr.next;
 
-                    if (Prev == null || Next == null) {
-                        if (Prev == null) {
-                            this.head = curr.next;
-                        }
-                        if (Next == null) {
-                            this.tail = curr.prev;
+                    if (Prev == null || Next == null) { // in case the item which we want to delete was either the head or the tail of the List
+                        if (Prev == null && Next == null) { // if the List contains only one item and its the item we want to delete
+                            this.head = null;
+                            this.tail = null;
+                        } else if (Prev == null) { // if the item we want to delete is the head of the List
+                            this.head = Next;
+                            Next.prev = this.tail;
+                        } else { // if the item we want to delete is the tail of the List
+                            this.tail = Prev;
+                            Prev.next = this.head;
                         }
                     } else {
                         Prev.next = Next;
                         Next.prev = Prev;
                     }
+                    return; // the deletion was done, now stop the process of the method
                 }
             }
         }
@@ -206,14 +274,13 @@ public class Graph {
      * K is set to default as Integer since it makes the implementation easier
      * @param <V>
      */
-    HashMap
     public class hashMap<V>{
         private int p; // the prime number of the Hash function
         private hashCell<V>[] table;
         private int a;
         private int b;
 
-        public hashMap(Node[] nodes, float loadFactor){
+        public hashMap(V[] nodes, float loadFactor){
             p = (int)Math.pow(10, 9) + 9;
             table = new hashCell[(int)((float)nodes.length*loadFactor)];
             Random rand = new Random();
@@ -255,12 +322,12 @@ public class Graph {
          * @param key
          * @return
          */
-        public hashCell get(int key) {
+        public V get(int key) {
             int hashedKey = hash(key);
             hashCell<V> curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
-                    return curr;
+                    return curr.getValue();
                 }
                 curr = curr.next;
             }
@@ -389,7 +456,6 @@ public class Graph {
         }
 
         /**
-         *
          * @param pos
          * @return True if the node at the given @pos (in the Heap's array) is a leaf in the array, using the Heap's array.
          */
@@ -415,7 +481,7 @@ public class Graph {
          * @param node
          */
         public void addNode(Node node) {
-            Heap[size++] = new heapNode(node.totalWeight, node);
+            Heap[size++] = new heapNode(node.vicinityWeight, node);
             int curr = size;
 
             while (Heap[curr].key > Heap[parent(curr)].key) {
@@ -426,22 +492,11 @@ public class Graph {
 
 
         /**
-         * a recursive method used to Heapify a node either UP or DOWN, after it has just been inserted in order to maintain the requirements for a Maximum-Heap.
-         * the node that we "Heapify" is the node which lies at the given index @pos in the Heap's Array
-         * @param pos
+         * this method returns the "head" of the Heap, or in other words: the node in the Heap which holds the largest key.
+         * @return
          */
-        public void Heapify(int pos) {
-            if (isLeaf(pos)) {
-                return;
-            }
-
-            if (Heap[pos].key < Heap[leftChild(pos)].key){
-                swap(pos, leftChild(pos));
-                Heapify(leftChild(pos));
-            } else if (Heap[pos].key < Heap[rightChild(pos)].key) {
-                swap(pos, rightChild(pos));
-                Heapify(rightChild(pos));
-            }
+        public heapNode getMax(){
+            return Heap[0];
         }
 
 
@@ -471,7 +526,7 @@ public class Graph {
              */
             public heapNode(){
                 this.key = Integer.MAX_VALUE;
-                this.value = null
+                this.value = null;
             }
 
             /**
@@ -481,8 +536,15 @@ public class Graph {
             public boolean isRealNode(){
                 return this.value != null;
             }
+
+            /**
+             * the getter of the Graph-node which lies under the given heap-Node
+             * @return
+             */
+            public Node getValue() {
+                return value;
+            }
         }
-        //TODO: implement this class;
     }
 
 
