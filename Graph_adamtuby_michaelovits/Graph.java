@@ -114,9 +114,18 @@ public class Graph {
     }
 
 
-
+    /**
+     * this method is used to determine the amount of nodes in the Graph
+     * @return the amount of nodes in the Maximum-Heap representing the Graph
+     */
     public int getNumNodes(){
         return nodesHeap.getSize();
+    }
+
+
+    public int getNumEdges(){
+        int sum = 0;
+        for ()
     }
 
 
@@ -266,6 +275,8 @@ public class Graph {
         }
 
 
+
+
         /**
          * this method is used to delete an item from the Doubly Linked List
          * <p>
@@ -300,6 +311,12 @@ public class Graph {
             }
         }
 
+
+
+        /**
+         * this class is the class of a single Cell in the list. The list contains ceveral Cells which are linked to each other.
+         * this class is mainly to keep the implementation of a linked list available for all kinds of lists that we want, including a linked list of Graph-Nodes.
+         */
         public class DoublyLinkedCell{
             private DoublyLinkedCell next;
             private DoublyLinkedCell prev;
@@ -338,6 +355,8 @@ public class Graph {
         private int hash(int key) { return Math.floorMod(a*key+b, p); }
 
 
+
+
         /**
          * a method used to add a new item to the Hash Map. this method would be used only amongst the class's constructor,
          * due to its simplicity of use and due to the project's needs.
@@ -359,6 +378,8 @@ public class Graph {
         }
 
 
+
+
         /**
          * returns the node in the hashMap who holds the given key
          * @param key
@@ -375,6 +396,9 @@ public class Graph {
             }
             return null;
         }
+
+
+
 
 
         /**
@@ -399,6 +423,9 @@ public class Graph {
             }
             return -1;
         }
+
+
+
 
         /**
          * the class used to implement the Cell class of the items in the Hash Map.
@@ -460,6 +487,8 @@ public class Graph {
         // this will be initialized in the Constructor as the maximum number of nodes in the Heap at any given time
         private int maxSize;
 
+
+
         /**
          * the constructor of the Maximum-Heap
          * initializes the maxSize with the given argument when called
@@ -473,6 +502,8 @@ public class Graph {
         }
 
 
+
+
         /**
          * this method is used to return the position (index) of the parent node (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
          * @param pos - the index of the node in the Heap's array
@@ -480,6 +511,10 @@ public class Graph {
         private int parent(int pos) {
             return Math.floorDiv(pos, 2);
         }
+
+
+
+
 
         /**
          * this method is used to return the position (index) of the left Child (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
@@ -489,6 +524,10 @@ public class Graph {
             return 2*pos;
         }
 
+
+
+
+
         /**
          * this method is used to return the position (index) of the Right Child (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
          * @param pos - the index of the original node in the Heap's array
@@ -497,6 +536,42 @@ public class Graph {
             return 2*pos + 1;
         }
 
+
+
+
+
+        /**
+         * this method's role is when a node in the Heap has more than one child, it returns the index (in the Heap's array) of the child with the smaller key.
+         * if the given index is bigger than the Heap's array size, and thus, there is no such node , return -1.
+         * if the given index holds a node which is a leaf, and therefore has no children, return -1.
+         * @param pos
+         * @return - the child with the smaller key of the node which lies at the index pos in the Heap's array
+         */
+        private int smallestChild(int pos) {
+            int pos1 = leftChild(pos);
+            int pos2 = rightChild(pos);
+
+            if (isLeaf(pos) || pos > getSize()) {
+                return -1;
+            }
+            if (pos1 <= getSize() && pos2 <= getSize()) {
+                if (Heap[pos1].key < Heap[pos2].key) {
+                    return pos1;
+                } else {
+                    return pos1;
+                }
+            } else if (pos1 <= getSize()) {
+                return pos1;
+            } else {
+                return pos2;
+            }
+        }
+
+
+
+
+
+
         /**
          * @param pos
          * @return True if the node at the given @pos (in the Heap's array) is a leaf in the array, using the Heap's array.
@@ -504,6 +579,9 @@ public class Graph {
         private boolean isLeaf(int pos){
             return (pos > size/2) && (pos <= size);
         }
+
+
+
 
 
         /**
@@ -523,6 +601,9 @@ public class Graph {
             Heap[pos2] = tmp;
         }
 
+
+
+
         /**
          * this method is used to add a node into the heap. it also performs the Heapifying-process used to maintain the balance and requirements of a Maximum-Heap
          * @param node
@@ -536,6 +617,25 @@ public class Graph {
                 curr = parent(curr);
             }
         }
+
+
+
+
+
+        /**
+         * this method is used when we want to delete a certain node from the whole Graph, and therefore we delete it from the Maximum-Heap as well.
+         * @param node - a pointer to the node in the Graph.
+         */
+        public void deleteNode(Node node){
+            heapNode currNode = node.heapForm;
+            heapNode newNode = Heap[Math.max(size-1, 0)];
+            swap(currNode.getPos(), newNode.getPos());
+            Heap[size--] = null;
+            Heapify(newNode);
+        }
+
+
+
 
 
         /**
@@ -556,18 +656,37 @@ public class Graph {
          * @param pos - the index at the Heap's array of the node we want to validate and Heapify.
          */
         private void Heapify_Rec(int pos){
-            if (Heap[pos].key < Heap[leftChild(pos)].key){
-                swap(pos, leftChild(pos));
-                Heapify_Rec(leftChild(pos));
-            } else if (Heap[pos].key < Heap[rightChild(pos)].key) {
-                swap(pos, rightChild(pos));
-                Heapify_Rec(rightChild(pos));
-            } else if (Heap[pos].key > Heap[parent(pos)].key) {
+            if (Heap[pos].key > Heap[parent(pos)].key) {
                 swap(pos, parent(pos));
-            } else {
+                Heapify_Rec(parent(pos));
                 return;
             }
+
+            int smallerChild = smallestChild(pos);
+
+            if (smallerChild < 0) {
+                return;
+            } else if (Heap[pos].key < Heap[smallerChild].key) {
+                swap(pos, smallerChild);
+                Heapify_Rec(smallerChild);
+            } else {
+                if (smallerChild == leftChild(pos) && rightChild(pos) <= getSize()) {
+                    if (Heap[pos].key < Heap[rightChild(pos)].key) {
+                        swap(pos, rightChild(pos));
+                        Heapify_Rec(rightChild(pos));
+                    }
+                } else if (smallerChild == rightChild(pos) && leftChild(pos) <= getSize()) {
+                    if (Heap[pos].key < Heap[leftChild(pos)].key) {
+                        swap(pos, leftChild(pos));
+                        Heapify_Rec(leftChild(pos));
+                    }
+                }
+            }
         }
+
+
+
+
 
         /**
          * this method returns the "head" of the Heap, or in other words: the node in the Heap which holds the largest key.
@@ -578,6 +697,8 @@ public class Graph {
         }
 
 
+
+
         /**
          * this method is used to get the amount of nodes in the Heap, or in other words, the amount of nodes in the overall Graph.
          * @return
@@ -585,6 +706,9 @@ public class Graph {
         public int getSize() {
             return size;
         }
+
+
+
 
         /**
          * this method is used to change the key of an already existing node in the Heap.
@@ -595,6 +719,9 @@ public class Graph {
             Heapify(node);
             //TODO: check validity of this method
         }
+
+
+
 
         /**
          * the class used to implement the nodes of the Maximum-Heap.
@@ -620,6 +747,7 @@ public class Graph {
             }
 
 
+
             /**
              * a Constructor to create a virtual node used in the initialization of a Maximum-Heap
              */
@@ -627,6 +755,9 @@ public class Graph {
                 this.key = Integer.MAX_VALUE;
                 this.value = null;
             }
+
+
+
 
             /**
              * checks if the given node is the virtual node that we create at the initialization of the Maximum-Heap
@@ -636,6 +767,9 @@ public class Graph {
                 return this.value != null;
             }
 
+
+
+
             /**
              * the getter of the Graph-node which lies under the given heap-Node
              * @return
@@ -643,6 +777,9 @@ public class Graph {
             public Node getValue() {
                 return value;
             }
+
+
+
 
             /**
              * this method is the 'setter' of the 'key' field of a heap-Node.
@@ -654,6 +791,8 @@ public class Graph {
             }
 
 
+
+
             /**
              * this method returns the position of the given heap-Node in the Heap's array
              * @return
@@ -661,6 +800,8 @@ public class Graph {
             public int getPos() {
                 return pos;
             }
+
+
 
 
             /**
