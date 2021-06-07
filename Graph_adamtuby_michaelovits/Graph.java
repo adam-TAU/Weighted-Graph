@@ -4,6 +4,7 @@ You are required to implement the methods of this skeleton file according to the
 You are allowed to add classes, methods, and members as required.
  */
 
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -93,6 +94,7 @@ public class Graph {
             totalWeight = weight;
             Neighbours = new DoublyLinkedList<>();
         }
+
 
         /**
          * Returns the id of the node.
@@ -204,6 +206,7 @@ public class Graph {
      * K is set to default as Integer since it makes the implementation easier
      * @param <V>
      */
+    HashMap
     public class hashMap<V>{
         private int p; // the prime number of the Hash function
         private hashCell<V>[] table;
@@ -252,7 +255,7 @@ public class Graph {
          * @param key
          * @return
          */
-        public hashCell getNode(int key) {
+        public hashCell get(int key) {
             int hashedKey = hash(key);
             hashCell<V> curr = table[hashedKey];
             while (curr != null) {
@@ -341,47 +344,106 @@ public class Graph {
      * Maximum Heap containing cells T
      */
     public class maxHeap{
-        // this will hold the pointer to the top node in the heap, thus, the node with the biggest key in the heap.
-        private heapNode head;
+        // this will be the array that represents the Maximum-Heap
+        private heapNode[] Heap;
+        // this will hold the number of nodes in the Heap
+        private int size;
+        // this will be initialized in the Constructor as the maximum number of nodes in the Heap at any given time
+        private int maxSize;
 
         /**
          * the constructor of the Maximum-Heap
+         * initializes the maxSize with the given argument when called
+         * creates the Heap's array according to the given maxSize
+         * initializes the head of the Heap to be a so-called "virtual node", in order to maintain balance when inserting the first node to the Heap.
          */
-        public maxHeap(){}
+        public maxHeap(int maxSize){
+            this.maxSize = maxSize;
+            this.size = 0;
+            Heap = new heapNode[maxSize];
+        }
+
 
         /**
-         * this method is used to add a node into the heap. if the node has a key which already exists in the heap, return -1
+         * this method is used to return the position (index) of the parent node (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
+         * @param pos - the index of the node in the Heap's array
+         */
+        private int parent(int pos) {
+            return Math.floorDiv(pos, 2);
+        }
+
+        /**
+         * this method is used to return the position (index) of the left Child (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
+         * @param pos - the index of the original node in the Heap's array
+         */
+        private int leftChild(int pos) {
+            return 2*pos;
+        }
+
+        /**
+         * this method is used to return the position (index) of the Right Child (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
+         * @param pos - the index of the original node in the Heap's array
+         */
+        private int rightChild(int pos) {
+            return 2*pos + 1;
+        }
+
+        /**
+         *
+         * @param pos
+         * @return True if the node at the given @pos (in the Heap's array) is a leaf in the array, using the Heap's array.
+         */
+        private boolean isLeaf(int pos){
+            return (pos > size/2) && (pos <= size);
+        }
+
+
+        /**
+         * this method is mainly created for the sake of performing Heapfies-UP and Heapifies-DOWN.
+         * it swaps the nodes at the given positions (@pos1, @pos2) in the Heap's array/
+         * @param pos1
+         * @param pos2
+         */
+        private void swap(int pos1, int pos2){
+            heapNode tmp = Heap[pos1];
+            Heap[pos1] = Heap[pos2];
+            Heap[pos2] = tmp;
+        }
+
+        /**
+         * this method is used to add a node into the heap. it also performs the Heapifying-process used to maintain the balance and requirements of a Maximum-Heap
          * @param node
          */
-        public int addNode(Node node) {
-            heapNode newNode = new heapNode(node.totalWeight, node);
-            heapNode curr = this.head;
-            if (curr == null){
-                head = newNode;
-                return 0;
+        public void addNode(Node node) {
+            Heap[size++] = new heapNode(node.totalWeight, node);
+            int curr = size;
+
+            while (Heap[curr].key > Heap[parent(curr)].key) {
+                swap(curr, parent(curr));
+                curr = parent(curr);
+            }
+        }
+
+
+        /**
+         * a recursive method used to Heapify a node either UP or DOWN, after it has just been inserted in order to maintain the requirements for a Maximum-Heap.
+         * the node that we "Heapify" is the node which lies at the given index @pos in the Heap's Array
+         * @param pos
+         */
+        public void Heapify(int pos) {
+            if (isLeaf(pos)) {
+                return;
             }
 
-            //TODO: implement this func
-            return 0;
+            if (Heap[pos].key < Heap[leftChild(pos)].key){
+                swap(pos, leftChild(pos));
+                Heapify(leftChild(pos));
+            } else if (Heap[pos].key < Heap[rightChild(pos)].key) {
+                swap(pos, rightChild(pos));
+                Heapify(rightChild(pos));
+            }
         }
 
-
-
-        /**
-         * used to Heapify @node UP when required in order to sustain the requirements of a Maximum-Heap
-         * @param node
-         */
-        public void HeapifyUp(heapNode node) {
-
-        }
-
-        /**
-         * used to Heapify @node DOWN when required in order to sustain the requirements of a Maximum-Heap
-         * @param node
-         */
-        public void HeapifyDown(heapNode node) {
-
-        }
 
         /**
          * the class used to implement the nodes of the Maximum-Heap.
@@ -401,6 +463,23 @@ public class Graph {
             public heapNode(int key, Node node){
                 this.key = key;
                 this.value = node;
+            }
+
+
+            /**
+             * a Constructor to create a virtual node used in the initialization of a Maximum-Heap
+             */
+            public heapNode(){
+                this.key = Integer.MAX_VALUE;
+                this.value = null
+            }
+
+            /**
+             * checks if the given node is the virtual node that we create at the initialization of the Maximum-Heap
+             * @return
+             */
+            public boolean isRealNode(){
+                return this.value != null;
             }
         }
         //TODO: implement this class;
