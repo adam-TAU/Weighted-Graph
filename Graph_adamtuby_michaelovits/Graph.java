@@ -110,23 +110,22 @@ public class Graph {
     public boolean deleteNode(int node_id){
         Node node = nodesHash.get(node_id);
 
-        if (node == null) {
+        if (node == null) { // if the node wasn't found in the Graph
             return false;
-        } else {
+        } else { // the node was found in the Graph
             nodesHash.removeNode(node_id);
             nodesHash.removeNode(node.getVicinityWeight());
             DoublyLinkedList.DoublyLinkedCell currCell = node.Neighbours.head;
 
-            for (int i=0; i<node.Neighbours.getSize(); i++) {
-                DoublyLinkedList.DoublyLinkedCell linkedCell = currCell.getParallel();
-                currCell.getRepresentativeList().deleteCell(currCell);
-                Node currNode = (Node) currCell.getItem();
-                currNode.UpdateVicinityWeight(-node.getWeight());
-                currCell = currCell.next;
+            for (int i=0; i<node.Neighbours.getSize(); i++) { // iterating between all of the edges 'node' was connected with, using the Neighbours of 'node'
+                DoublyLinkedList.DoublyLinkedCell linkedCell = currCell.getParallel(); // getting the parallel form of the edge in order to remove it from the other end of the edge (which is not 'node')
+                currCell.getRepresentativeList().deleteCell(currCell); // deleting the edge and removing 'node' from the Neighbours list of its Neighbour
+                Node currNode = (Node) currCell.getItem(); // getting the Neighbour's form as a Node
+                currNode.UpdateVicinityWeight(-node.getWeight()); // removing the 'node'`s weight from the vicinity weight of its Neighbour, and therefore, possibly Heapifying the Neighbour in the Maximum-Heap of the Graph
+                currCell = currCell.next; // continuing on to the next Neighbour
             }
+            return true;
         }
-
-        return false;
     }
 
 
