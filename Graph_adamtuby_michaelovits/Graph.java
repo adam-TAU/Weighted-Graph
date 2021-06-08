@@ -6,6 +6,9 @@ You are allowed to add classes, methods, and members as required.
 
 import java.util.Random;
 
+// TODO: add a double pointer to each edge
+// TODO: implement the deletion method
+
 /**
  * This class represents a graph that efficiently maintains the heaviest neighborhood over edge addition and
  * vertex deletion.
@@ -90,13 +93,18 @@ public class Graph {
         node1.addNeighbour(node2);
         node2.addNeighbour(node1);
 
+
+        // adding the 'parallel' field of each DoublyLinkedList cell representing the freshly added edge as the parallel form of the edge in the neighbour's DoublyLinkedList
+        node1.Neighbours.tail.setParallel(node2.Neighbours.tail);
+        node2.Neighbours.tail.setParallel(node1.Neighbours.tail);
+
         return true;
     }
 
     /**
      * Given the id of a node in the graph, deletes the node of that id from the graph, if it exists.
      *
-     * @param node_id - the id of the node to delete.
+     * @param node_id the id of the node to delete.
      * @return returns 'true' if the function deleted a node, otherwise returns 'false'
      */
     public boolean deleteNode(int node_id){
@@ -104,10 +112,20 @@ public class Graph {
 
         if (node == null) {
             return false;
+        } else {
+            nodesHash.removeNode(node_id);
+            nodesHash.removeNode(node.getVicinityWeight());
+            DoublyLinkedList.DoublyLinkedCell currCell = node.Neighbours.head;
+
+            for (int i=0; i<node.Neighbours.getSize(); i++) {
+                DoublyLinkedList.DoublyLinkedCell linkedCell = currCell.getParallel();
+                currCell.getRepresentativeList().deleteCell(currCell);
+                Node currNode = (Node) currCell.getItem();
+                currNode.UpdateVicinityWeight(-node.getWeight());
+                currCell = currCell.next;
+            }
         }
 
-
-        // TODO: delete it from the Graph
         return false;
     }
 
@@ -163,8 +181,8 @@ public class Graph {
 
         /**
          * Creates a new node object, given its id and its weight.
-         * @param id - the id of the node.
-         * @param weight - the weight of the node.
+         * @param id the id of the node.
+         * @param weight the weight of the node.
          */
         public Node(int id, int weight){
             this.id = id;
@@ -216,19 +234,10 @@ public class Graph {
         }
 
 
-        /**
-         * this method is used to add a Neighbour, which is @node. In other words, this method is used to delete an Edge that consists of the original node and the given node as an argument.
-         * @param node
-         */
-        public void deleteNeighbour(Node node){
-            Neighbours.deleteItem(node);
-            UpdateVicinityWeight(-node.getWeight());
-        }
-
 
         /**
          * this method is used to add as a new field - the pointer of the node's form in the Maximum-Heap of the Graph.
-         * @param heapForm - the pointer we update the field 'heapForm' to.
+         * @param heapForm the pointer we update the field 'heapForm' to.
          */
         public void setHeapForm(maxHeap.heapNode heapForm) {
             this.heapForm = heapForm;
@@ -238,7 +247,7 @@ public class Graph {
 
         /**
          * this method is used to add as a new field - the pointer of the node's form in the hash-Map of the Graph.
-         * @param hashForm - the pointer we update the field 'hashForm' to.
+         * @param hashForm the pointer we update the field 'hashForm' to.
          */
         public void setHashForm(hashMap.hashCell hashForm) {
             this.hashForm = hashForm;
@@ -257,7 +266,7 @@ public class Graph {
 
     /**
      * a Doubly Linked List implemented by basic pointers logic.
-     * @param <T> - the class of each value in each cell of the list.
+     * @param <T> the class of each value in each cell of the list.
      */
     public static class DoublyLinkedList<T>{
         private DoublyLinkedCell tail;
@@ -302,39 +311,29 @@ public class Graph {
         /**
          * this method is used to delete an item from the Doubly Linked List
          * <p>
-         * performed in O(n), while n is the length of the List
+         * performed in O(1)
          * </p>
-         * @pre item must exist in the List
+         * @pre item must be the direct pointer to the cell that holds the item we want deleted
          * @param item
          */
-        public void deleteItem(T item){
-            size -= 1;
-            DoublyLinkedCell curr = this.head;
-            while (curr != null) {
-                if (curr.item == item) {
-                    DoublyLinkedCell Prev = curr.prev;
-                    DoublyLinkedCell Next = curr.next;
+        public void deleteCell(DoublyLinkedCell item){
+            DoublyLinkedCell Prev = item.prev;
+            DoublyLinkedCell Next = item.next;
 
-                    if (Prev == null || Next == null) { // in case the item which we want to delete was either the head or the tail of the List
-                        if (Prev == null && Next == null) { // if the List contains only one item and its the item we want to delete
-                            this.head = null;
-                            this.tail = null;
-                        } else if (Prev == null) { // if the item we want to delete is the head of the List
-                            this.head = Next;
-                            Next.prev = this.tail;
-                        } else { // if the item we want to delete is the tail of the List
-                            this.tail = Prev;
-                            Prev.next = this.head;
-                        }
-                    } else {
-                        Prev.next = Next;
-                        Next.prev = Prev;
-                    }
-                    return; // the deletion was done, now stop the process of the method
-                } else {
-                    curr = curr.next;
-                }
+            if (size == 1) { // if the item is the only item in the list
+                this.head = null;
+                this.tail = null;
+                size = 0;
+                return;
+            } else if (this.head == item) { // if the item is the head of the list
+                this.head = Next;
+            } else if (this.tail == item) { // if the item is the tail of the list
+                this.tail = Prev;
             }
+
+            Prev.next = Next;
+            Next.prev = Prev;
+            size -= 1;
         }
 
 
@@ -353,10 +352,50 @@ public class Graph {
         public class DoublyLinkedCell{
             private DoublyLinkedCell next;
             private DoublyLinkedCell prev;
+            private DoublyLinkedCell parallel;
             private final T item;
 
+            /**
+             * the constructor of this class
+             * @param item the value we want to assign to the DoublyLinkedList cell
+             */
             public DoublyLinkedCell(T item) {
                 this.item = item;
+            }
+
+
+            /**
+             * the 'setter' of this field
+             * @param parallel the DoublyLinkedCell we want to assign as the parallel cell of th given DoublyLinkedList cell
+             */
+            public void setParallel(DoublyLinkedCell parallel) {
+                this.parallel = parallel;
+            }
+
+            /**
+             * the 'getter' of this field
+             * @return the parallel cell of the given DoublyLinkedList cell
+             */
+            public DoublyLinkedCell getParallel() {
+                return parallel;
+            }
+
+
+            /**
+             * the 'getter' of the given cell's DoublyLinkedList
+             * @return the DoublyLinkedList which holds the given DoublyLinkedCell
+             */
+            public DoublyLinkedList getRepresentativeList(){
+                return DoublyLinkedList.this;
+            }
+
+
+            /**
+             * the 'getter' of the given cell's item/value
+             * @return the value that the cell holds
+             */
+            public T getItem() {
+                return item;
             }
         }
     }
@@ -540,7 +579,7 @@ public class Graph {
 
         /**
          * this method is used to return the position (index) of the parent node (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
-         * @param pos - the index of the node in the Heap's array
+         * @param pos the index of the node in the Heap's array
          */
         private int parent(int pos) {
             return Math.floorDiv(pos, 2);
@@ -552,7 +591,7 @@ public class Graph {
 
         /**
          * this method is used to return the position (index) of the left Child (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
-         * @param pos - the index of the original node in the Heap's array
+         * @param pos the index of the original node in the Heap's array
          */
         private int leftChild(int pos) {
             return 2*pos;
@@ -564,7 +603,7 @@ public class Graph {
 
         /**
          * this method is used to return the position (index) of the Right Child (in the Heap's array) - of the node at the given @pos (in the Heap's array), using the Heap's array.
-         * @param pos - the index of the original node in the Heap's array
+         * @param pos the index of the original node in the Heap's array
          */
         private int rightChild(int pos) {
             return 2*pos + 1;
@@ -661,13 +700,17 @@ public class Graph {
         /**
          * this method is used when we want to delete a certain node from the whole Graph, and therefore we delete it from the Maximum-Heap as well.
          * @pre the node must exist in the Heap
-         * @param node - a pointer to the node in the Graph.
+         * @param node a pointer to the node in the Graph.
          */
         public void deleteNode(Node node){
+            if (size == 1) {
+                Heap[0] = null;
+                return;
+            }
             heapNode currNode = node.heapForm;
-            heapNode newNode = Heap[Math.max(size-1, 0)];
+            heapNode newNode = Heap[size-1];
             swap(currNode.getPos(), newNode.getPos());
-            Heap[size--] = null;
+            Heap[--size] = null;
             Heapify(newNode);
         }
 
@@ -690,7 +733,7 @@ public class Graph {
 
         /**
          * this is the recursive-method that 'Heapify' wraps.
-         * @param pos - the index at the Heap's array of the node we want to validate and Heapify.
+         * @param pos the index at the Heap's array of the node we want to validate and Heapify.
          */
         private void Heapify_Rec(int pos){
             if (Heap[pos].key > Heap[parent(pos)].key) {
@@ -783,7 +826,7 @@ public class Graph {
             /**
              * this method is the 'setter' of the 'key' field of a heap-Node.
              * this method will be used when we want to *initialize* the key of the given heap-Node/
-             * @param key - the new 'key' field's value
+             * @param key the new 'key' field's value
              */
             public void setKey(int key) {
                 this.key = key;
@@ -816,12 +859,11 @@ public class Graph {
 
             /**
              * this method is used to *change* the key of an already existing node in the Heap.
-             * @param key - the new key of this node
+             * @param key the new key of this node
              */
             public void changeKey(int key){
                 this.setKey(key);
                 Heapify(this);
-                //TODO: check validity of this method
             }
         }
     }
