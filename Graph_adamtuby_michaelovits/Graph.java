@@ -13,7 +13,7 @@ import java.util.Random;
  *
  */
 public class Graph {
-    private hashMap<Node> nodesHash;
+    private hashMap nodesHash;
     private maxHeap nodesHeap;
     private Node[] Nodes;
 
@@ -25,7 +25,7 @@ public class Graph {
      */
     public Graph(Node [] nodes){
         Nodes = nodes;
-        nodesHash = new hashMap<Node>(nodes, 1);
+        nodesHash = new hashMap(nodes, 1);
         nodesHeap = new maxHeap(nodes.length);
 
         for (Node node : nodes) { // adding all of the nodes to the Hash-Map and to the Maximum-Heap
@@ -116,6 +116,9 @@ public class Graph {
 
     /**
      * this method is used to determine the amount of nodes in the Graph
+     * <p>
+     * The time complexity of this method is O(1)
+     * </p>
      * @return the amount of nodes in the Maximum-Heap representing the Graph
      */
     public int getNumNodes(){
@@ -123,9 +126,20 @@ public class Graph {
     }
 
 
+    /**
+     * this method is used to determine the amount of edges that there are in the Graph.
+     * <p>
+     * The time complexity of this method is O(n) while n is the amount of vertices in the Graph.
+     * </p>
+     * @return
+     */
     public int getNumEdges(){
         int sum = 0;
-        for ()
+        for (maxHeap.heapNode node : nodesHeap.Heap) {
+            sum += node.getValue().getNeighboursAmount();
+            // TODO: add the size of the list to each cell of a linked list in the hash Map
+        }
+        return sum/2;
     }
 
 
@@ -148,6 +162,7 @@ public class Graph {
         private int vicinityWeight;
         private DoublyLinkedList<Node> Neighbours;
         private maxHeap.heapNode heapForm;
+        private hashMap.hashCell hashForm;
 
         /**
          * Creates a new node object, given its id and its weight.
@@ -220,6 +235,25 @@ public class Graph {
         public void setHeapForm(maxHeap.heapNode heapForm) {
             this.heapForm = heapForm;
         }
+
+
+
+        /**
+         * this method is used to add as a new field - the pointer of the node's form in the hash-Map of the Graph.
+         * @param hashForm - the pointer we update the field 'hashForm' to.
+         */
+        public void setHashForm(hashMap.hashCell hashForm) {
+            this.hashForm = hashForm;
+        }
+
+
+        /**
+         * this method returns the amount of Neighbours that the node has - Or in other words, the amount of edges that the node partakes in.
+         * @return
+         */
+        public int getNeighboursAmount(){
+            return this.Neighbours.getSize();
+        }
     }
 
     public class Edge{
@@ -243,15 +277,18 @@ public class Graph {
     public class DoublyLinkedList<T>{
         private DoublyLinkedCell tail;
         private DoublyLinkedCell head;
+        private int size;
 
         /**
          * this method is used to add a new item to the Doubly Linked List
          * <p>
          * this method has a time-Complexity of O(1)
          * </p>
+         * @pre item must not exist in the List
          * @param item
          */
         public void addItem(T item){
+            size += 1;
             DoublyLinkedCell curr = this.head;
             DoublyLinkedCell newCell = new DoublyLinkedCell(item);
 
@@ -282,9 +319,11 @@ public class Graph {
          * <p>
          * performed in O(n), while n is the length of the List
          * </p>
+         * @pre item must exist in the List
          * @param item
          */
         public void deleteItem(T item){
+            size -= 1;
             DoublyLinkedCell curr = this.head;
             while (curr != null) {
                 if (curr.item == item) {
@@ -312,6 +351,13 @@ public class Graph {
         }
 
 
+        /**
+         * this method returns the length of this Linked List
+         * @return
+         */
+        public int getSize() {
+            return size;
+        }
 
         /**
          * this class is the class of a single Cell in the list. The list contains ceveral Cells which are linked to each other.
@@ -329,17 +375,16 @@ public class Graph {
     }
 
     /**
-     * a hashMap mapping from keys: K to values: V using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
+     * a hashMap mapping from keys: K to values: Node, using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
      * K is set to default as Integer since it makes the implementation easier
-     * @param <V>
      */
-    public class hashMap<V>{
+    public class hashMap{
         private int p; // the prime number of the Hash function
-        private hashCell<V>[] table;
+        private hashCell[] table;
         private int a;
         private int b;
 
-        public hashMap(V[] nodes, float loadFactor){
+        public hashMap(Node[] nodes, float loadFactor){
             p = (int)Math.pow(10, 9) + 9;
             table = new hashCell[(int)((float)nodes.length*loadFactor)];
             Random rand = new Random();
@@ -360,17 +405,18 @@ public class Graph {
         /**
          * a method used to add a new item to the Hash Map. this method would be used only amongst the class's constructor,
          * due to its simplicity of use and due to the project's needs.
+         * @pre the key must not exist in the Hash-Map
          * @param key
          * @param item
          */
-        public void addItem(int key, V item){
+        public void addItem(int key, Node item){
             int hashedKey = hash(key);
-            hashCell<V> curr = table[hashedKey];
+            hashCell curr = table[hashedKey];
             if (curr == null) {
-                table[hashedKey] = new hashCell<V>(hashedKey, key, item, null);
+                table[hashedKey] = new hashCell(hashedKey, key, item, null);
                 return;
             }
-            hashCell<V> newItem = new hashCell<V>(hashedKey, key, item, curr);
+            hashCell newItem = new hashCell(hashedKey, key, item, curr);
             while (curr.next != null) {
                 curr = curr.next;
             }
@@ -385,9 +431,9 @@ public class Graph {
          * @param key
          * @return
          */
-        public V get(int key) {
+        public Node get(int key) {
             int hashedKey = hash(key);
-            hashCell<V> curr = table[hashedKey];
+            hashCell curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
                     return curr.getValue();
@@ -407,8 +453,8 @@ public class Graph {
          */
         public int removeNode(int key) {
             int hashedKey = hash(key);
-            hashCell<V> prev = null;
-            hashCell<V> curr = table[hashedKey];
+            hashCell prev = null;
+            hashCell curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
                     if (prev != null){
@@ -430,13 +476,12 @@ public class Graph {
         /**
          * the class used to implement the Cell class of the items in the Hash Map.
          * The Cell holds a pointer to the actual node in the Graph that has the given key, and in addition, holds a pointer to its cell in the Maximum-Heap.
-         * @param <V>
          */
-        public class hashCell<V>{
+        public class hashCell{
             private final int hash;
             private final int key;
-            private V value;
-            private hashCell<V> next;
+            private Node value;
+            private hashCell next;
 
             /**
              * the constructor of a Cell in the Hash-Map.
@@ -445,11 +490,12 @@ public class Graph {
              * @param value
              * @param next
              */
-            public hashCell(int hash, int key, V value, hashCell<V> next) {
+            public hashCell(int hash, int key, Node value, hashCell next) {
                 this.hash = hash;
                 this.key = key;
                 this.value = value;
                 this.next = next;
+                value.setHashForm(this);
             }
 
 
@@ -464,14 +510,14 @@ public class Graph {
              * the cell's value's getter
              * @return
              */
-            public V getValue() { return this.value; }
+            public Node getValue() { return this.value; }
 
 
             /**
              * the cell's value's setter
              * @param newValue
              */
-            public void setValue(V newValue){ value = newValue; }
+            public void setValue(Node newValue){ value = newValue; }
 
         }
     }
@@ -586,7 +632,8 @@ public class Graph {
 
         /**
          * this method is mainly created for the sake of performing Heapfies-UP and Heapifies-DOWN.
-         * it swaps the nodes at the given positions (@pos1, @pos2) in the Heap's array/
+         * it swaps the nodes at the given positions (@pos1, @pos2) in the Heap's array
+         * @pre pos1 <= size && pos2 <= size
          * @param pos1
          * @param pos2
          */
@@ -606,6 +653,7 @@ public class Graph {
 
         /**
          * this method is used to add a node into the heap. it also performs the Heapifying-process used to maintain the balance and requirements of a Maximum-Heap
+         * @pre the node must not exist in the Heap
          * @param node
          */
         public void addNode(Node node) {
@@ -624,6 +672,7 @@ public class Graph {
 
         /**
          * this method is used when we want to delete a certain node from the whole Graph, and therefore we delete it from the Maximum-Heap as well.
+         * @pre the node must exist in the Heap
          * @param node - a pointer to the node in the Graph.
          */
         public void deleteNode(Node node){
