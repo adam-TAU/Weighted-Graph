@@ -4,6 +4,10 @@ You are required to implement the methods of this skeleton file according to the
 You are allowed to add classes, methods, and members as required.
  */
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 // TODO: add a double pointer to each edge
@@ -25,7 +29,7 @@ public class Graph {
      * @param nodes - an array of node objects
      */
     public Graph(Node [] nodes){
-        nodesHash = new hashMap(nodes, 1);
+        nodesHash = new hashMap(nodes.length, 0.5f);
         nodesHeap = new maxHeap(nodes.length);
 
         for (Node node : nodes) { // adding all of the nodes to the Hash-Map and to the Maximum-Heap
@@ -167,6 +171,29 @@ public class Graph {
         return this.nodesHeap.getSize() == 0;
     }
 
+
+
+
+    /**
+     * the method called when we want to print an Object of type 'Graph'
+     * the implementation of this method is the basic preview we want for a graph to make basic validity tests
+     * @return
+     */
+    @Override
+    public String toString(){
+        String result = "";
+
+        result = "is the graph empty? " + this.isEmpty() + "\n";
+        result += this.nodesHash.toString();
+        this.nodesHeap.printHeap();
+
+        return result;
+        // TODO: implement this method. implement a 'toString' to the Maximum-Heap and to the HashMap.
+    }
+
+
+
+
     /**
      * This class represents a node in the graph.
      */
@@ -259,6 +286,18 @@ public class Graph {
          */
         public int getNeighboursAmount(){
             return this.Neighbours.getSize();
+        }
+
+
+        /**
+         * the method called when we want to print an Object of type 'Node'
+         * the implementation of this method is the basic preview we want for a Node to make basic validity tests
+         * @return
+         */
+        @Override
+        public String toString(){
+            return "";
+            //TODO: implement this method
         }
     }
 
@@ -409,20 +448,25 @@ public class Graph {
         private final hashCell[] table;
         private final int a;
         private final int b;
+        private final int m;
 
-        public hashMap(Node[] nodes, float loadFactor){
-            p = (int)Math.pow(10, 9) + 9;
-            table = new hashCell[(int)((float)nodes.length*loadFactor)];
+        public hashMap(int m, float loadFactor){
+            this.p = (int)Math.pow(10, 9) + 9;
+            this.m = (int)((float)m*(1/loadFactor));
+            this.table = new hashCell[this.m];
+
             Random rand = new Random();
-            a = rand.nextInt(p-1) + 1;
-            b = rand.nextInt(p);
+            this.a = rand.nextInt(p-1) + 1;
+            this.b = rand.nextInt(p);
         }
 
         /**
          * the hash function of the hashMap
          * @return
          */
-        private int hash(int key) { return Math.floorMod(a*key+b, p); }
+        private int hash(int key) {
+            return Math.floorMod(Math.floorMod(a*key+b, p), this.m);
+        }
 
 
 
@@ -437,15 +481,17 @@ public class Graph {
         public void addItem(int key, Node item){
             int hashedKey = hash(key);
             hashCell curr = table[hashedKey];
+
             if (curr == null) {
                 table[hashedKey] = new hashCell(hashedKey, key, item, null);
                 return;
             }
+
             hashCell newItem = new hashCell(hashedKey, key, item, curr);
             while (curr.next != null) {
                 curr = curr.next;
             }
-            curr.next = newItem;
+            curr.setNext(newItem);
         }
 
 
@@ -496,6 +542,17 @@ public class Graph {
         }
 
 
+        /**
+         * the method called when we want to print an Object of type 'hashMap'
+         * the implementation of this method is the basic preview we want for a hashMap to make basic validity tests
+         * @return
+         */
+        @Override
+        public String toString(){
+            String sb;
+            sb = "hashMap's array size is: " + this.table.length;
+            return sb;
+        }
 
 
         /**
@@ -544,6 +601,14 @@ public class Graph {
              */
             public void setValue(Node newValue){ value = newValue; }
 
+
+            /**
+             * the 'setter' of the 'next' field of the cell
+             * @param next
+             */
+            public void setNext(hashCell next) {
+                this.next = next;
+            }
         }
     }
 
@@ -581,6 +646,9 @@ public class Graph {
          * @param pos the index of the node in the Heap's array
          */
         private int parent(int pos) {
+            if (pos % 2 == 0) {
+                return pos / 2 - 1;
+            }
             return Math.floorDiv(pos, 2);
         }
 
@@ -593,7 +661,7 @@ public class Graph {
          * @param pos the index of the original node in the Heap's array
          */
         private int leftChild(int pos) {
-            return 2*pos;
+            return 2*(pos+1)-1;
         }
 
 
@@ -605,7 +673,7 @@ public class Graph {
          * @param pos the index of the original node in the Heap's array
          */
         private int rightChild(int pos) {
-            return 2*pos + 1;
+            return 2*(pos+1);
         }
 
 
@@ -623,16 +691,16 @@ public class Graph {
             int pos1 = leftChild(pos);
             int pos2 = rightChild(pos);
 
-            if (isLeaf(pos) || pos > getSize()) {
+            if (isLeaf(pos) || pos > getMaxIndex()) {
                 return -1;
             }
-            if (pos1 <= getSize() && pos2 <= getSize()) {
+            if (pos1 <= getMaxIndex() && pos2 <= getMaxIndex()) {
                 if (Heap[pos1].key < Heap[pos2].key) {
                     return pos1;
                 } else {
-                    return pos1;
+                    return pos2;
                 }
-            } else if (pos1 <= getSize()) {
+            } else if (pos1 <= getMaxIndex()) {
                 return pos1;
             } else {
                 return pos2;
@@ -649,7 +717,7 @@ public class Graph {
          * @return True if the node at the given @pos (in the Heap's array) is a leaf in the array, using the Heap's array.
          */
         private boolean isLeaf(int pos){
-            return (pos > size/2) && (pos <= size);
+            return (leftChild(pos) > getMaxIndex()) && (pos <= getMaxIndex());
         }
 
 
@@ -684,12 +752,19 @@ public class Graph {
          */
         public void addNode(Node node) {
             Heap[size++] = new heapNode(node.getVicinityWeight(), node, size);
-            int curr = size;
+            int curr = getMaxIndex();
 
-            while (Heap[curr].key > Heap[parent(curr)].key) {
+            if (curr == 0) {
+                return;
+            }
+
+            do {
                 swap(curr, parent(curr));
                 curr = parent(curr);
-            }
+                if (curr == 0) {
+                    break;
+                }
+            } while (Heap[curr].key > Heap[parent(curr)].key);
         }
 
 
@@ -749,12 +824,12 @@ public class Graph {
                 swap(pos, smallerChild);
                 Heapify_Rec(smallerChild);
             } else {
-                if (smallerChild == leftChild(pos) && rightChild(pos) <= getSize()) {
+                if (smallerChild == leftChild(pos) && rightChild(pos) <= getMaxIndex()) {
                     if (Heap[pos].key < Heap[rightChild(pos)].key) {
                         swap(pos, rightChild(pos));
                         Heapify_Rec(rightChild(pos));
                     }
-                } else if (smallerChild == rightChild(pos) && leftChild(pos) <= getSize()) {
+                } else if (smallerChild == rightChild(pos) && leftChild(pos) <= getMaxIndex()) {
                     if (Heap[pos].key < Heap[leftChild(pos)].key) {
                         swap(pos, leftChild(pos));
                         Heapify_Rec(leftChild(pos));
@@ -786,6 +861,89 @@ public class Graph {
             return size;
         }
 
+
+        /**
+         * the index of the last node in the Array of this Heap to be different than a 'null'
+         * @return
+         */
+        public int getMaxIndex(){
+            return size-1;
+        }
+
+
+        /**
+         * the method called when we want to print an Object of type 'maxHeap'
+         * the implementation of this method is the basic preview we want for a maxHeap to make basic validity tests
+         * @return
+         */
+        public String printHeap(){
+            // TODO: check out why this method isn't working
+            if (this.Heap.length == 0) {
+                System.out.println("Heap is empty.");
+            }
+            int treeHeight = (int) (Math.log(this.getSize()) / Math.log(2)) + 1;
+            int treeWidth = (int) Math.pow(2, treeHeight);
+            List<heapNode> curr = new ArrayList<heapNode>(1), next = new ArrayList<heapNode>(2);
+            curr.add(getMax());
+            final int maxHalfLength = 4;
+            int elements = 1;
+            StringBuilder sb = new StringBuilder(maxHalfLength * treeWidth);
+            for(int i = 0; i < maxHalfLength * treeWidth; i++)
+                sb.append(' ');
+            String textBuffer;
+            // Iterating through height levels.
+            for(int i = 0; i < treeHeight; i++) {
+
+                sb.setLength(maxHalfLength * ((int)Math.pow(2, treeHeight-1-i) - 1));
+                // Creating spacer space indicator.
+                textBuffer = sb.toString();
+                // Print tree node elements
+                for(heapNode n : curr) {
+                    System.out.print(textBuffer);
+                    if(n == null) {
+
+                        System.out.print("        ");
+                        next.add(null);
+                        next.add(null);
+                    } else {
+                        if (n != null) {
+                            System.out.printf("(%6d)", n.getKey());
+                        }
+                        else {
+                            System.out.printf("        ");
+                        }
+                        if (rightChild(n.getPos()) <= getMaxIndex()) {
+                            next.add(this.Heap[leftChild(n.getPos())]);
+                            next.add(this.Heap[rightChild(n.getPos())]);
+                        } else if (leftChild(n.getPos()) <= getMaxIndex()) {
+                            next.add(this.Heap[leftChild(n.getPos())]);
+                        }
+
+                    }
+                    System.out.print(textBuffer);
+                }
+                System.out.println();
+                // Print tree node extensions for next level.
+                if(i < treeHeight - 1) {
+                    for(heapNode n : curr) {
+                        System.out.print(textBuffer);
+                        if(n == null)
+                            System.out.print("        ");
+                        else
+                            System.out.printf("%s      %s",
+                                    leftChild(n.getPos()) <= getMaxIndex() ? (this.Heap[leftChild(n.getPos())] == null ? " " : "/") : "/", rightChild(n.getPos()) <= getMaxIndex() ? (this.Heap[rightChild(n.getPos())] == null ? " " : "\\") : "\\");
+                        System.out.print(textBuffer);
+                    }
+                    System.out.println();
+                }
+                // Renewing indicators for next run.
+                elements *= 2;
+                curr = next;
+                next = new ArrayList<heapNode>(elements);
+            }
+            System.out.println("\n\n");
+            return "";
+        }
 
 
 
@@ -820,7 +978,13 @@ public class Graph {
             }
 
 
-
+            /**
+             * the getter of the key of the heapNode
+             * @return
+             */
+            public int getKey() {
+                return key;
+            }
 
             /**
              * this method is the 'setter' of the 'key' field of a heap-Node.
