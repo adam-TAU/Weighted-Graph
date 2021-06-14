@@ -5,6 +5,7 @@ You are allowed to add classes, methods, and members as required.
  */
 
 import java.lang.reflect.Array;
+import java.security.spec.RSAOtherPrimeInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -118,7 +119,7 @@ public class Graph {
             return false;
         } else { // the node was found in the Graph
             nodesHash.removeNode(node_id);
-            nodesHash.removeNode(node.getVicinityWeight());
+            nodesHeap.deleteNode(node);
             DoublyLinkedList.DoublyLinkedCell currCell = node.Neighbours.head;
 
             for (int i=0; i<node.Neighbours.getSize(); i++) { // iterating between all of the edges 'node' was connected with, using the Neighbours of 'node'
@@ -128,6 +129,7 @@ public class Graph {
                 currNode.UpdateVicinityWeight(-node.getWeight()); // removing the 'node'`s weight from the vicinity weight of its Neighbour, and therefore, possibly Heapifying the Neighbour in the Maximum-Heap of the Graph
                 currCell = currCell.next; // continuing on to the next Neighbour
             }
+
             return true;
         }
     }
@@ -691,19 +693,16 @@ public class Graph {
             int pos1 = leftChild(pos);
             int pos2 = rightChild(pos);
 
-            if (isLeaf(pos) || pos > getMaxIndex()) {
+            if (isLeaf(pos) || pos > getMaxIndex()) { // if the pos is the position of a: leaf/non-node, return -1 so we know it doesn't have a such thing as: 'smallesChild'
                 return -1;
-            }
-            if (pos1 <= getMaxIndex() && pos2 <= getMaxIndex()) {
+            } else if (pos1 <= getMaxIndex() && pos2 <= getMaxIndex()) { // if the node has both children, return the position of the child with the smalller key
                 if (Heap[pos1].key < Heap[pos2].key) {
                     return pos1;
                 } else {
                     return pos2;
                 }
-            } else if (pos1 <= getMaxIndex()) {
+            } else { // the node doesn't have both children but isn't a leaf - therefore the leftChild is the only possible 'smallestChild'
                 return pos1;
-            } else {
-                return pos2;
             }
         }
 
@@ -777,15 +776,16 @@ public class Graph {
          * @param node a pointer to the node in the Graph.
          */
         public void deleteNode(Node node){
-            if (size == 1) {
-                Heap[0] = null;
+            int pos = node.heapForm.getPos();
+
+            if (size == 1 || isLeaf(pos)) {
+                Heap[--size] = null;
                 return;
             }
-            heapNode currNode = node.heapForm;
-            heapNode newNode = Heap[size-1];
-            swap(currNode.getPos(), newNode.getPos());
+
+            swap(pos, getMaxIndex());
             Heap[--size] = null;
-            Heapify(newNode);
+            Heapify(this.Heap[pos]);
         }
 
 
@@ -810,31 +810,22 @@ public class Graph {
          * @param pos the index at the Heap's array of the node we want to validate and Heapify.
          */
         private void Heapify_Rec(int pos){
-            if (Heap[pos].key > Heap[parent(pos)].key) {
-                swap(pos, parent(pos));
-                Heapify_Rec(parent(pos));
-                return;
+
+            if (pos != 0) {
+                if (Heap[pos].key > Heap[parent(pos)].key) { // if we need to heapify the node up
+                    swap(pos, parent(pos));
+                    Heapify_Rec(parent(pos));
+                    return;
+                }
             }
 
             int smallerChild = smallestChild(pos);
 
-            if (smallerChild < 0) {
+            if (smallerChild < 0) { // if the node doesn't have such thing as a 'smallestChild' (could result due to it being a leaf/non-node)
                 return;
-            } else if (Heap[pos].key < Heap[smallerChild].key) {
+            } else if (Heap[pos].key < Heap[smallerChild].key) { // checking if we need to Heapify down the node
                 swap(pos, smallerChild);
                 Heapify_Rec(smallerChild);
-            } else {
-                if (smallerChild == leftChild(pos) && rightChild(pos) <= getMaxIndex()) {
-                    if (Heap[pos].key < Heap[rightChild(pos)].key) {
-                        swap(pos, rightChild(pos));
-                        Heapify_Rec(rightChild(pos));
-                    }
-                } else if (smallerChild == rightChild(pos) && leftChild(pos) <= getMaxIndex()) {
-                    if (Heap[pos].key < Heap[leftChild(pos)].key) {
-                        swap(pos, leftChild(pos));
-                        Heapify_Rec(leftChild(pos));
-                    }
-                }
             }
         }
 

@@ -15,6 +15,9 @@ public class graphTester {
 
         Graph graph = new Graph(nodes);
         System.out.println(graph.toString());
+        graph.addEdge(9, 10);
+        graph.deleteNode(10);
+        System.out.println(graph.toString());
     }
 
 }
