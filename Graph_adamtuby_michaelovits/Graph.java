@@ -4,15 +4,12 @@ You are required to implement the methods of this skeleton file according to the
 You are allowed to add classes, methods, and members as required.
  */
 
-import java.lang.reflect.Array;
-import java.security.spec.RSAOtherPrimeInfo;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-// TODO: add a double pointer to each edge
-// TODO: implement the deletion method
 
 /**
  * This class represents a graph that efficiently maintains the heaviest neighborhood over edge addition and
@@ -94,7 +91,7 @@ public class Graph {
 
         // adding each node to the other's Neighbours list:
         // this process will be changing the nodes' vicinity weight due to their addition of a new neighbour as a result of an addition of a new edge to the graph
-        // this process will also cause a heapifying process in the Maximum-Heap of the Graph - since their keys in the Heap (their vicinity weight) have been changed
+        // this process will also cause a heapifying process in the Maximum-Heap of the Graph - since their keys in the Heap (their vicinity weight) have been change
         node1.addNeighbour(node2);
         node2.addNeighbour(node1);
 
@@ -123,9 +120,10 @@ public class Graph {
             DoublyLinkedList.DoublyLinkedCell currCell = node.Neighbours.head;
 
             int neighboursCount = node.getNeighboursAmount();
+
             for (int i=0; i<neighboursCount; i++) { // iterating between all of the edges 'node' was connected with, using the Neighbours of 'node'
                 DoublyLinkedList.DoublyLinkedCell linkedCell = currCell.getParallel(); // getting the parallel form of the edge in order to remove it from the other end of the edge (which is not 'node')
-                currCell.getRepresentativeList().deleteCell(currCell); // deleting the edge and removing 'node' from the Neighbours list of its Neighbour
+                linkedCell.getRepresentativeList().deleteCell(linkedCell); // deleting the edge and removing 'node' from the Neighbours list of its Neighbour
                 Node currNode = (Node) currCell.getItem(); // getting the Neighbour's form as a Node
                 currNode.UpdateVicinityWeight(-node.getWeight()); // removing the 'node'`s weight from the vicinity weight of its Neighbour, and therefore, possibly Heapifying the Neighbour in the Maximum-Heap of the Graph
                 currCell = currCell.next; // continuing on to the next Neighbour
@@ -158,6 +156,9 @@ public class Graph {
     public int getNumEdges(){
         int sum = 0;
         for (maxHeap.heapNode node : nodesHeap.Heap) {
+            if (node == null) {
+                break;
+            }
             sum += node.getValue().getNeighboursAmount();
         }
         return sum/2;
@@ -187,10 +188,12 @@ public class Graph {
         String result = "";
         result += "\n\n\n\n";
         result += "Is the graph empty? " + (this.isEmpty() ? "Yes" : "Nope") + "\n";
+        result += "Maximum Neighbour Weight (the node's ID): " + maxNeighborhoodWeight().getId() + "\n";
+        result += "Amount of Nodes in the Graph: " + getNumNodes() + "\n";
+        result += "Amount of Edges in the Graph: " + getNumEdges() + "\n";
         result += this.nodesHash.toString() + "\n".repeat(5);
         result += this.nodesHeap.toString();
         return result;
-        // TODO: implement this method. implement a 'toString' to the Maximum-Heap and to the HashMap.
     }
 
 
@@ -299,7 +302,7 @@ public class Graph {
         @Override
         public String toString(){
             return "";
-            //TODO: implement this method
+            //TODO: implement this method (not to relevant tho)
         }
     }
 
@@ -357,13 +360,13 @@ public class Graph {
          * @param item
          */
         public void deleteCell(DoublyLinkedCell item){
+            length -= 1;
             DoublyLinkedCell Prev = item.prev;
             DoublyLinkedCell Next = item.next;
 
             if (length == 1) { // if the item is the only item in the list
                 this.head = null;
                 this.tail = null;
-                length = 0;
                 return;
             } else if (this.head == item) { // if the item is the head of the list
                 this.head = Next;
@@ -373,7 +376,6 @@ public class Graph {
 
             Prev.next = Next;
             Next.prev = Prev;
-            length -= 1;
         }
 
 
@@ -561,7 +563,7 @@ public class Graph {
         @Override
         public String toString(){
             String result = "";
-            result = "hashMap's array size is: " + this.table.length + "\n";
+            result = "HashMap's array size is: " + this.table.length + "\n";
             result += "\t".repeat(this.table.length - 1) + "Hash-Map" + "\n";
             result += "----".repeat(this.table.length*2) + "\n";
 
@@ -914,7 +916,6 @@ public class Graph {
          */
         @Override
         public String toString(){
-            // TODO: check out why this method isn't working
             if (this.Heap.length == 0) {
                 return "Heap is empty.";
             }
@@ -1037,7 +1038,7 @@ public class Graph {
              */
             public void setKey(int key) {
                 this.key = key;
-                // TODO: check if this method is actually necessary
+                // TODO: check if this method's necessity
             }
 
 
