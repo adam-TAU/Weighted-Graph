@@ -187,7 +187,7 @@ public class Graph {
         String result = "";
         result += "\n\n\n\n";
         result += "Is the graph empty? " + (this.isEmpty() ? "Yes" : "Nope") + "\n";
-        result += this.nodesHash.toString() + "\n\n";
+        result += this.nodesHash.toString() + "\n".repeat(5);
         result += this.nodesHeap.toString();
         return result;
         // TODO: implement this method. implement a 'toString' to the Maximum-Heap and to the HashMap.
@@ -498,7 +498,7 @@ public class Graph {
                 return;
             }
 
-            hashCell newItem = new hashCell(hashedKey, key, item, curr);
+            hashCell newItem = new hashCell(hashedKey, key, item, null);
             while (curr.next != null) {
                 curr = curr.next;
             }
@@ -560,9 +560,33 @@ public class Graph {
          */
         @Override
         public String toString(){
-            String sb;
-            sb = "hashMap's array size is: " + this.table.length;
-            return sb;
+            String result = "";
+            result = "hashMap's array size is: " + this.table.length + "\n";
+            result += "\t".repeat(this.table.length - 1) + "Hash-Map" + "\n";
+            result += "----".repeat(this.table.length*2) + "\n";
+
+            result += "\t".repeat(this.table.length - 3) + "Number of nodes in the Graph: " + Graph.this.nodesHeap.getSize() + "\n";
+            result += "----".repeat(this.table.length*2) + "\n";
+
+            result += "\t".repeat(this.table.length - 2) + "Columns taken: " + Arrays.asList(table).stream().filter(x -> x != null).mapToInt(x -> 1).sum() + "\n";
+            result += "----".repeat(this.table.length*2) + "\n";
+
+            String textBuffer = "\t";
+            hashCell[] tmpTable = this.table.clone();
+
+            while (Arrays.asList(tmpTable).stream().filter(x -> x != null).mapToInt(x -> 1).sum() > 0) {
+                for (int i=0; i<this.table.length; i++) {
+                    if (tmpTable[i] != null) {
+                        result += "| " + tmpTable[i].getValue().getId() + " |" + textBuffer;
+                        tmpTable[i] = tmpTable[i].next;
+                    } else {
+                        result += "     " + textBuffer;
+                    }
+                }
+                result += "\n";
+            }
+
+            return result;
         }
 
 
@@ -924,7 +948,7 @@ public class Graph {
                         next.add(null);
                     } else {
                         if (n != null) {
-                            String some = String.format("(%6d)", n.getKey());
+                            String some = String.format("(" + "%d" + "\033[1m" + ":%4d)" + "\033[0m", n.getValue().getId(), n.getKey()); // if we feel the need to change this just remove the '\003' part and delete the first % param
                             result += some;
                         }
                         else {

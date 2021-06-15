@@ -1,6 +1,12 @@
 
 public class graphTester {
     public static void main(String[] args) {
+        firstTest();
+    }
+
+
+
+    public static void firstTest(){
         Graph.Node[] nodes = new Graph.Node[10];
         nodes[0] = new Graph.Node(1, 3);
         nodes[1] = new Graph.Node(2, 4);
@@ -17,10 +23,13 @@ public class graphTester {
         graph.addEdge(9, 10);
         graph.addEdge(9, 1);
         graph.addEdge(9, 5);
-        System.out.println(graph.toString());
+        graph.addEdge(2,10);
+        graph.addEdge(4,7);
+        graph.addEdge(1,3);
+        graph.addEdge(7,6);
+
         graph.deleteNode(9);
         System.out.println(graph.toString());
-
     }
 
 }
