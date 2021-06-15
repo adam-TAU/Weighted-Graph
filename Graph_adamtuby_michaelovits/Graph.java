@@ -122,7 +122,8 @@ public class Graph {
             nodesHeap.deleteNode(node);
             DoublyLinkedList.DoublyLinkedCell currCell = node.Neighbours.head;
 
-            for (int i=0; i<node.Neighbours.getSize(); i++) { // iterating between all of the edges 'node' was connected with, using the Neighbours of 'node'
+            int neighboursCount = node.getNeighboursAmount();
+            for (int i=0; i<neighboursCount; i++) { // iterating between all of the edges 'node' was connected with, using the Neighbours of 'node'
                 DoublyLinkedList.DoublyLinkedCell linkedCell = currCell.getParallel(); // getting the parallel form of the edge in order to remove it from the other end of the edge (which is not 'node')
                 currCell.getRepresentativeList().deleteCell(currCell); // deleting the edge and removing 'node' from the Neighbours list of its Neighbour
                 Node currNode = (Node) currCell.getItem(); // getting the Neighbour's form as a Node
@@ -184,11 +185,10 @@ public class Graph {
     @Override
     public String toString(){
         String result = "";
-
-        result = "is the graph empty? " + this.isEmpty() + "\n";
-        result += this.nodesHash.toString();
-        this.nodesHeap.printHeap();
-
+        result += "\n\n\n\n";
+        result += "Is the graph empty? " + (this.isEmpty() ? "Yes" : "Nope") + "\n";
+        result += this.nodesHash.toString() + "\n\n";
+        result += this.nodesHeap.toString();
         return result;
         // TODO: implement this method. implement a 'toString' to the Maximum-Heap and to the HashMap.
     }
@@ -287,7 +287,7 @@ public class Graph {
          * @return
          */
         public int getNeighboursAmount(){
-            return this.Neighbours.getSize();
+            return this.Neighbours.length();
         }
 
 
@@ -311,7 +311,7 @@ public class Graph {
     public static class DoublyLinkedList<T>{
         private DoublyLinkedCell tail;
         private DoublyLinkedCell head;
-        private int size;
+        private int length = 0;
 
         /**
          * this method is used to add a new item to the Doubly Linked List
@@ -322,11 +322,11 @@ public class Graph {
          * @param item
          */
         public void addItem(T item){
-            size += 1;
+            length += 1;
             DoublyLinkedCell curr = this.head;
             DoublyLinkedCell newCell = new DoublyLinkedCell(item);
 
-            if (curr == null) { // this is true if and only if the List is empty
+            if (this.isEmpty()) { // this is true if and only if the List is empty
                 this.head = newCell;
                 this.tail = newCell;
                 newCell.prev = newCell;
@@ -360,10 +360,10 @@ public class Graph {
             DoublyLinkedCell Prev = item.prev;
             DoublyLinkedCell Next = item.next;
 
-            if (size == 1) { // if the item is the only item in the list
+            if (length == 1) { // if the item is the only item in the list
                 this.head = null;
                 this.tail = null;
-                size = 0;
+                length = 0;
                 return;
             } else if (this.head == item) { // if the item is the head of the list
                 this.head = Next;
@@ -373,7 +373,16 @@ public class Graph {
 
             Prev.next = Next;
             Next.prev = Prev;
-            size -= 1;
+            length -= 1;
+        }
+
+
+        /**
+         * this method is used to determine whether or not the list is empty
+         * @return False if the first item of the list is a null and therefore the list is empty, else return True
+         */
+        public boolean isEmpty(){
+            return this.head == null;
         }
 
 
@@ -381,8 +390,8 @@ public class Graph {
          * this method returns the length of this Linked List
          * @return
          */
-        public int getSize() {
-            return size;
+        public int length() {
+            return length;
         }
 
         /**
@@ -689,19 +698,15 @@ public class Graph {
          * @param pos
          * @return - the child with the smaller key of the node which lies at the index pos in the Heap's array
          */
-        private int smallestChild(int pos) {
+        private int biggerChild(int pos) {
             int pos1 = leftChild(pos);
             int pos2 = rightChild(pos);
 
             if (isLeaf(pos) || pos > getMaxIndex()) { // if the pos is the position of a: leaf/non-node, return -1 so we know it doesn't have a such thing as: 'smallesChild'
                 return -1;
             } else if (pos1 <= getMaxIndex() && pos2 <= getMaxIndex()) { // if the node has both children, return the position of the child with the smalller key
-                if (Heap[pos1].key < Heap[pos2].key) {
-                    return pos1;
-                } else {
-                    return pos2;
-                }
-            } else { // the node doesn't have both children but isn't a leaf - therefore the leftChild is the only possible 'smallestChild'
+                return Heap[pos1].key < Heap[pos2].key ? pos2 : pos1;
+            } else { // the node doesn't have a right child but isn't a leaf - therefore the leftChild is the only possible 'biggerChild'
                 return pos1;
             }
         }
@@ -811,21 +816,37 @@ public class Graph {
          */
         private void Heapify_Rec(int pos){
 
+            // if we need to heapify the node up
             if (pos != 0) {
-                if (Heap[pos].key > Heap[parent(pos)].key) { // if we need to heapify the node up
+                if (Heap[pos].key > Heap[parent(pos)].key) {
                     swap(pos, parent(pos));
                     Heapify_Rec(parent(pos));
                     return;
                 }
             }
 
-            int smallerChild = smallestChild(pos);
 
-            if (smallerChild < 0) { // if the node doesn't have such thing as a 'smallestChild' (could result due to it being a leaf/non-node)
+            // if we need to heapify the node down
+            int biggerchild = biggerChild(pos);
+
+            if (biggerchild < 0) { // if the node doesn't have such thing as a 'biggerChild' (could result due to it being a leaf/non-node)
                 return;
-            } else if (Heap[pos].key < Heap[smallerChild].key) { // checking if we need to Heapify down the node
-                swap(pos, smallerChild);
-                Heapify_Rec(smallerChild);
+            } else if (Heap[pos].key < Heap[biggerchild].key) { // checking if we actually need to Heapify down the node
+                swap(pos, biggerchild);
+                Heapify_Rec(biggerchild);
+                return;
+            } else {
+                if (leftChild(pos) == biggerchild && rightChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a left child and is bigger than the parent
+                    if (Heap[pos].key < Heap[rightChild(pos)].key) {
+                        swap(pos, rightChild(pos));
+                        Heapify_Rec(rightChild(pos));
+                    }
+                } else if (rightChild(pos) == biggerchild && leftChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a right child and is bigger than the parent
+                    if (Heap[pos].key < Heap[leftChild(pos)].key) {
+                        swap(pos, leftChild(pos));
+                        Heapify_Rec(leftChild(pos));
+                    }
+                }
             }
         }
 
@@ -867,13 +888,18 @@ public class Graph {
          * the implementation of this method is the basic preview we want for a maxHeap to make basic validity tests
          * @return
          */
-        public String printHeap(){
+        @Override
+        public String toString(){
             // TODO: check out why this method isn't working
             if (this.Heap.length == 0) {
-                System.out.println("Heap is empty.");
+                return "Heap is empty.";
             }
+            String result = "";
+
             int treeHeight = (int) (Math.log(this.getSize()) / Math.log(2)) + 1;
             int treeWidth = (int) Math.pow(2, treeHeight);
+            result += "\t".repeat(treeWidth/2 - 1) + "Maximum Heap\n";
+            result += "-".repeat(treeWidth*4) + "\n";
             List<heapNode> curr = new ArrayList<heapNode>(1), next = new ArrayList<heapNode>(2);
             curr.add(getMax());
             final int maxHalfLength = 4;
@@ -890,18 +916,19 @@ public class Graph {
                 textBuffer = sb.toString();
                 // Print tree node elements
                 for(heapNode n : curr) {
-                    System.out.print(textBuffer);
+                    result += textBuffer;
                     if(n == null) {
 
-                        System.out.print("        ");
+                        result += "        ";
                         next.add(null);
                         next.add(null);
                     } else {
                         if (n != null) {
-                            System.out.printf("(%6d)", n.getKey());
+                            String some = String.format("(%6d)", n.getKey());
+                            result += some;
                         }
                         else {
-                            System.out.printf("        ");
+                            result += "        ";
                         }
                         if (rightChild(n.getPos()) <= getMaxIndex()) {
                             next.add(this.Heap[leftChild(n.getPos())]);
@@ -911,29 +938,31 @@ public class Graph {
                         }
 
                     }
-                    System.out.print(textBuffer);
+                    result += textBuffer;
                 }
-                System.out.println();
+                result += "\n";
                 // Print tree node extensions for next level.
                 if(i < treeHeight - 1) {
                     for(heapNode n : curr) {
-                        System.out.print(textBuffer);
-                        if(n == null)
-                            System.out.print("        ");
-                        else
-                            System.out.printf("%s      %s",
+                        result += textBuffer;
+                        if(n == null) {
+                            result += "        ";}
+                        else {
+                            String some = String.format("%s      %s",
                                     leftChild(n.getPos()) <= getMaxIndex() ? (this.Heap[leftChild(n.getPos())] == null ? " " : "/") : "/", rightChild(n.getPos()) <= getMaxIndex() ? (this.Heap[rightChild(n.getPos())] == null ? " " : "\\") : "\\");
-                        System.out.print(textBuffer);
+                            result += some;
+                            result += textBuffer;
+                        }
                     }
-                    System.out.println();
+                    result += "\n";
                 }
                 // Renewing indicators for next run.
                 elements *= 2;
                 curr = next;
                 next = new ArrayList<heapNode>(elements);
             }
-            System.out.println("\n\n");
-            return "";
+            result += "\n\n\n";
+            return result;
         }
 
 

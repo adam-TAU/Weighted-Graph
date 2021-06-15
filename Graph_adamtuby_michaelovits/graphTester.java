@@ -14,10 +14,13 @@ public class graphTester {
         nodes[9] = new Graph.Node(10, 2);
 
         Graph graph = new Graph(nodes);
-        System.out.println(graph.toString());
         graph.addEdge(9, 10);
-        graph.deleteNode(10);
+        graph.addEdge(9, 1);
+        graph.addEdge(9, 5);
         System.out.println(graph.toString());
+        graph.deleteNode(9);
+        System.out.println(graph.toString());
+
     }
 
 }
