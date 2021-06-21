@@ -5,10 +5,7 @@ You are allowed to add classes, methods, and members as required.
  */
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 /**
@@ -17,8 +14,8 @@ import java.util.Random;
  *
  */
 public class Graph {
-    private final hashMap nodesHash;
-    private final maxHeap nodesHeap;
+    private final hashMap<Node> nodesHash;
+    private final maxHeap<Node> nodesHeap;
 
     /**
      * Initializes the graph on a given set of nodes. The created graph is empty, i.e. it has no edges.
@@ -27,12 +24,14 @@ public class Graph {
      * @param nodes - an array of node objects
      */
     public Graph(Node [] nodes){
-        nodesHash = new hashMap(nodes.length, 0.5f);
-        nodesHeap = new maxHeap(nodes.length);
+        nodesHash = new hashMap<>(nodes.length, 0.5f);
+        nodesHeap = new maxHeap<>(nodes.length);
 
         for (Node node : nodes) { // adding all of the nodes to the Hash-Map and to the Maximum-Heap
-            nodesHash.addItem(node.getId(), node);
-            nodesHeap.addNode(node);
+            hashMap<Node>.hashCell<Node> hashForm = nodesHash.addItem(node.getId(), node);
+            node.setHashForm(hashForm);
+            maxHeap<Node>.heapNode<Node> heapForm = nodesHeap.addNode(node, node.getVicinityWeight());
+            node.setHeapForm(heapForm);
         }
     }
 
@@ -116,15 +115,15 @@ public class Graph {
             return false;
         } else { // the node was found in the Graph
             nodesHash.removeNode(node_id);
-            nodesHeap.deleteNode(node);
-            DoublyLinkedList.DoublyLinkedCell currCell = node.Neighbours.head;
+            nodesHeap.deleteNode(node.heapForm);
+            DoublyLinkedList<Node>.DoublyLinkedCell currCell = node.Neighbours.head;
 
             int neighboursCount = node.getNeighboursAmount();
 
             for (int i=0; i<neighboursCount; i++) { // iterating between all of the edges 'node' was connected with, using the Neighbours of 'node'
-                DoublyLinkedList.DoublyLinkedCell linkedCell = currCell.getParallel(); // getting the parallel form of the edge in order to remove it from the other end of the edge (which is not 'node')
+                DoublyLinkedList<Node>.DoublyLinkedCell linkedCell = currCell.getParallel(); // getting the parallel form of the edge in order to remove it from the other end of the edge (which is not 'node')
                 linkedCell.getRepresentativeList().deleteCell(linkedCell); // deleting the edge and removing 'node' from the Neighbours list of its Neighbour
-                Node currNode = (Node) currCell.getItem(); // getting the Neighbour's form as a Node
+                Node currNode = currCell.getItem(); // getting the Neighbour's form as a Node
                 currNode.UpdateVicinityWeight(-node.getWeight()); // removing the 'node'`s weight from the vicinity weight of its Neighbour, and therefore, possibly Heapifying the Neighbour in the Maximum-Heap of the Graph
                 currCell = currCell.next; // continuing on to the next Neighbour
             }
@@ -155,7 +154,7 @@ public class Graph {
      */
     public int getNumEdges(){
         int sum = 0;
-        for (maxHeap.heapNode node : nodesHeap.Heap) {
+        for (maxHeap<Node>.heapNode<Node> node : nodesHeap.Heap) {
             if (node == null) {
                 break;
             }
@@ -198,24 +197,25 @@ public class Graph {
 
 
     private String repeat(String inp, int reps) {
-        String out = "";
+        StringBuilder out = new StringBuilder();
         for (int i = 0; i < reps; i++) {
-            out += inp;
+            out.append(inp);
         }
-        return out;
+        return out.toString();
     }
 
 
     /**
      * This class represents a node in the graph.
      */
+    // todo: implement getters to the hashForm and heapForm
     public static class Node{
         private final int id;
         private final int weight;
         private int vicinityWeight;
         private final DoublyLinkedList<Node> Neighbours;
-        private maxHeap.heapNode heapForm;
-        private hashMap.hashCell hashForm;
+        private maxHeap<Node>.heapNode<Node> heapForm;
+        private hashMap<Node>.hashCell<Node> hashForm;
 
         /**
          * Creates a new node object, given its id and its weight.
@@ -277,7 +277,7 @@ public class Graph {
          * this method is used to add as a new field - the pointer of the node's form in the Maximum-Heap of the Graph.
          * @param heapForm the pointer we update the field 'heapForm' to.
          */
-        public void setHeapForm(maxHeap.heapNode heapForm) {
+        public void setHeapForm(maxHeap<Node>.heapNode<Node> heapForm) {
             this.heapForm = heapForm;
         }
 
@@ -287,7 +287,7 @@ public class Graph {
          * this method is used to add as a new field - the pointer of the node's form in the hash-Map of the Graph.
          * @param hashForm the pointer we update the field 'hashForm' to.
          */
-        public void setHashForm(hashMap.hashCell hashForm) {
+        public void setHashForm(hashMap<Node>.hashCell<Node> hashForm) {
             this.hashForm = hashForm;
         }
 
@@ -318,7 +318,7 @@ public class Graph {
      * a Doubly Linked List implemented by basic pointers logic.
      * @param <T> the class of each value in each cell of the list.
      */
-    public static class DoublyLinkedList<T>{
+    private static class DoublyLinkedList<T>{
         private DoublyLinkedCell tail;
         private DoublyLinkedCell head;
         private int length = 0;
@@ -333,7 +333,6 @@ public class Graph {
          */
         public void addItem(T item){
             length += 1;
-            DoublyLinkedCell curr = this.head;
             DoublyLinkedCell newCell = new DoublyLinkedCell(item);
 
             if (this.isEmpty()) { // this is true if and only if the List is empty
@@ -345,7 +344,7 @@ public class Graph {
             }
 
             // inserting the item at the tail of the List
-            curr = this.tail;
+            DoublyLinkedCell curr = this.tail;
             this.tail = newCell;
             curr.next = newCell;
             newCell.prev = curr;
@@ -404,10 +403,10 @@ public class Graph {
         }
 
         /**
-         * this class is the class of a single Cell in the list. The list contains ceveral Cells which are linked to each other.
+         * this class is the class of a single Cell in the list. The list contains several Cells which are linked to each other.
          * this class is mainly to keep the implementation of a linked list available for all kinds of lists that we want, including a linked list of Graph-Nodes.
          */
-        public class DoublyLinkedCell{
+        private class DoublyLinkedCell{
             private DoublyLinkedCell next;
             private DoublyLinkedCell prev;
             private DoublyLinkedCell parallel;
@@ -443,7 +442,7 @@ public class Graph {
              * the 'getter' of the given cell's DoublyLinkedList
              * @return the DoublyLinkedList which holds the given DoublyLinkedCell
              */
-            public DoublyLinkedList getRepresentativeList(){
+            public DoublyLinkedList<T> getRepresentativeList(){
                 return DoublyLinkedList.this;
             }
 
@@ -463,9 +462,9 @@ public class Graph {
      * a hashMap mapping from keys: K to values: Node, using chaining (LinkedList) and Universal Hashing (we'll implement a hash function within the class)
      * K is set to default as Integer since it makes the implementation easier
      */
-    public class hashMap{
+    private class hashMap<V>{
         private final int p; // the prime number of the Hash function
-        private final hashCell[] table;
+        private final hashCell<V>[] table;
         private final int a;
         private final int b;
         private final int m;
@@ -498,20 +497,21 @@ public class Graph {
          * @param key
          * @param item
          */
-        public void addItem(int key, Node item){
+        public hashCell<V> addItem(int key, V item){
             int hashedKey = hash(key);
-            hashCell curr = table[hashedKey];
+            hashCell<V> curr = table[hashedKey];
 
             if (curr == null) {
-                table[hashedKey] = new hashCell(hashedKey, key, item, null);
-                return;
+                table[hashedKey] = new hashCell<>(hashedKey, key, item, null);
+                return table[hashedKey];
             }
 
-            hashCell newItem = new hashCell(hashedKey, key, item, null);
+            hashCell<V> newItem = new hashCell<>(hashedKey, key, item, null);
             while (curr.next != null) {
                 curr = curr.next;
             }
             curr.setNext(newItem);
+            return newItem;
         }
 
 
@@ -522,9 +522,9 @@ public class Graph {
          * @param key
          * @return
          */
-        public Node get(int key) {
+        public V get(int key) {
             int hashedKey = hash(key);
-            hashCell curr = table[hashedKey];
+            hashCell<V> curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
                     return curr.getValue();
@@ -544,8 +544,8 @@ public class Graph {
          */
         public int removeNode(int key) {
             int hashedKey = hash(key);
-            hashCell prev = null;
-            hashCell curr = table[hashedKey];
+            hashCell<V> prev = null;
+            hashCell<V> curr = table[hashedKey];
             while (curr != null) {
                 if (curr.key == key){
                     if (prev != null){
@@ -569,33 +569,33 @@ public class Graph {
          */
         @Override
         public String toString(){
-            String result = "";
-            result = "HashMap's array size is: " + this.table.length + "\n";
-            result += repeat("\t", this.table.length - 1) + "Hash-Map" + "\n";
-            result += repeat("----", this.table.length*2) + "\n";
+            StringBuilder result;
+            result = new StringBuilder("HashMap's array size is: " + this.table.length + "\n");
+            result.append(repeat("\t", this.table.length - 1)).append("Hash-Map").append("\n");
+            result.append(repeat("----", this.table.length * 2)).append("\n");
 
-            result += repeat("\t", this.table.length - 3) + "Number of nodes in the Graph: " + Graph.this.nodesHeap.getSize() + "\n";
-            result += repeat("----", this.table.length*2) + "\n";
+            result.append(repeat("\t", this.table.length - 3)).append("Number of nodes in the Graph: ").append(Graph.this.nodesHeap.getSize()).append("\n");
+            result.append(repeat("----", this.table.length * 2)).append("\n");
 
-            result += repeat("\t", this.table.length - 2) + "Columns taken: " + Arrays.asList(table).stream().filter(x -> x != null).mapToInt(x -> 1).sum() + "\n";
-            result += repeat("----", this.table.length*2) + "\n";
+            result.append(repeat("\t", this.table.length - 2)).append("Columns taken: ").append(Arrays.stream(table).filter(Objects::nonNull).mapToInt(x -> 1).sum()).append("\n");
+            result.append(repeat("----", this.table.length * 2)).append("\n");
 
             String textBuffer = "\t";
-            hashCell[] tmpTable = this.table.clone();
+            hashCell<V>[] tmpTable = this.table.clone();
 
-            while (Arrays.asList(tmpTable).stream().filter(x -> x != null).mapToInt(x -> 1).sum() > 0) {
+            while (Arrays.stream(tmpTable).filter(Objects::nonNull).mapToInt(x -> 1).sum() > 0) {
                 for (int i=0; i<this.table.length; i++) {
                     if (tmpTable[i] != null) {
-                        result += "| " + tmpTable[i].getValue().getId() + " |" + textBuffer;
+                        result.append("| ").append(tmpTable[i].getKey()).append(" |").append(textBuffer);
                         tmpTable[i] = tmpTable[i].next;
                     } else {
-                        result += "     " + textBuffer;
+                        result.append("     ").append(textBuffer);
                     }
                 }
-                result += "\n";
+                result.append("\n");
             }
 
-            return result;
+            return result.toString();
         }
 
 
@@ -603,11 +603,11 @@ public class Graph {
          * the class used to implement the Cell class of the items in the Hash Map.
          * The Cell holds a pointer to the actual node in the Graph that has the given key, and in addition, holds a pointer to its cell in the Maximum-Heap.
          */
-        public class hashCell{
+        private class hashCell<T>{
             private final int hash;
             private final int key;
-            private Node value;
-            private hashCell next;
+            private T value;
+            private hashCell<T> next;
 
             /**
              * the constructor of a Cell in the Hash-Map.
@@ -616,12 +616,11 @@ public class Graph {
              * @param value
              * @param next
              */
-            public hashCell(int hash, int key, Node value, hashCell next) {
+            public hashCell(int hash, int key, T value, hashCell<T> next) {
                 this.hash = hash;
                 this.key = key;
                 this.value = value;
                 this.next = next;
-                value.setHashForm(this);
             }
 
 
@@ -636,21 +635,21 @@ public class Graph {
              * the cell's value's getter
              * @return
              */
-            public Node getValue() { return this.value; }
+            public T getValue() { return this.value; }
 
 
             /**
              * the cell's value's setter
              * @param newValue
              */
-            public void setValue(Node newValue){ value = newValue; }
+            public void setValue(T newValue){ value = newValue; }
 
 
             /**
              * the 'setter' of the 'next' field of the cell
              * @param next
              */
-            public void setNext(hashCell next) {
+            public void setNext(hashCell<T> next) {
                 this.next = next;
             }
         }
@@ -660,9 +659,9 @@ public class Graph {
     /**
      * Maximum Heap containing cells T
      */
-    public class maxHeap{
+    private class maxHeap<T>{
         // this will be the array that represents the Maximum-Heap
-        private final heapNode[] Heap;
+        private final heapNode<T>[] Heap;
         // this will hold the number of nodes in the Heap
         private int size;
         // this will be initialized in the Constructor as the maximum number of nodes in the Heap at any given time
@@ -735,9 +734,9 @@ public class Graph {
             int pos1 = leftChild(pos);
             int pos2 = rightChild(pos);
 
-            if (isLeaf(pos) || pos > getMaxIndex()) { // if the pos is the position of a: leaf/non-node, return -1 so we know it doesn't have a such thing as: 'smallesChild'
+            if (isLeaf(pos) || pos > getMaxIndex()) { // if the pos is the position of a: leaf/non-node, return -1 so we know it doesn't have a such thing as: 'smallestChild'
                 return -1;
-            } else if (pos1 <= getMaxIndex() && pos2 <= getMaxIndex()) { // if the node has both children, return the position of the child with the smalller key
+            } else if (pos1 <= getMaxIndex() && pos2 <= getMaxIndex()) { // if the node has both children, return the position of the child with the smaller key
                 return Heap[pos1].key < Heap[pos2].key ? pos2 : pos1;
             } else { // the node doesn't have a right child but isn't a leaf - therefore the leftChild is the only possible 'biggerChild'
                 return pos1;
@@ -774,7 +773,7 @@ public class Graph {
             Heap[pos2].setPos(pos1);
 
             // performing the swapping process
-            heapNode tmp = Heap[pos1];
+            heapNode<T> tmp = Heap[pos1];
             Heap[pos1] = Heap[pos2];
             Heap[pos2] = tmp;
         }
@@ -787,12 +786,13 @@ public class Graph {
          * @pre the node must not exist in the Heap
          * @param node
          */
-        public void addNode(Node node) {
-            Heap[size++] = new heapNode(node.getVicinityWeight(), node, size);
+        public heapNode<T> addNode(T node, int key) {
+            Heap[size++] = new heapNode<>(key, node, size); // key = node.getVicinityWeight()
             int curr = getMaxIndex();
+            heapNode<T> heapForm = Heap[curr];
 
             if (curr == 0) {
-                return;
+                return heapForm;
             }
 
             do {
@@ -802,6 +802,7 @@ public class Graph {
                     break;
                 }
             } while (Heap[curr].key > Heap[parent(curr)].key);
+            return heapForm;
         }
 
 
@@ -813,8 +814,8 @@ public class Graph {
          * @pre the node must exist in the Heap
          * @param node a pointer to the node in the Graph.
          */
-        public void deleteNode(Node node){
-            int pos = node.heapForm.getPos();
+        public void deleteNode(heapNode<T> node){
+            int pos = node.getPos();
 
             if (size == 1 || isLeaf(pos)) {
                 Heap[--size] = null;
@@ -837,7 +838,7 @@ public class Graph {
          * </p>
          * @param node
          */
-        public void Heapify(heapNode node) {
+        public void Heapify(heapNode<T> node) {
             int pos = node.getPos();
             Heapify_Rec(pos);
         }
@@ -891,7 +892,7 @@ public class Graph {
          * this method returns the "head" of the Heap, or in other words: the node in the Heap which holds the largest key.
          * @return
          */
-        public heapNode getMax(){
+        public heapNode<T> getMax(){
             return Heap[0];
         }
 
@@ -926,13 +927,13 @@ public class Graph {
             if (this.Heap.length == 0) {
                 return "Heap is empty.";
             }
-            String result = "";
+            StringBuilder result = new StringBuilder();
 
             int treeHeight = (int) (Math.log(this.getSize()) / Math.log(2)) + 1;
             int treeWidth = (int) Math.pow(2, treeHeight);
-            result += repeat("\t", treeWidth/2 - 1) + "Maximum Heap\n";
-            result += repeat("-", treeWidth*4) + "\n";
-            List<heapNode> curr = new ArrayList<heapNode>(1), next = new ArrayList<heapNode>(2);
+            result.append(repeat("\t", treeWidth / 2 - 1)).append("Maximum Heap\n");
+            result.append(repeat("-", treeWidth * 4)).append("\n");
+            List<heapNode<T>> curr = new ArrayList<>(1), next = new ArrayList<>(2);
             curr.add(getMax());
             final int maxHalfLength = 4;
             int elements = 1;
@@ -947,20 +948,20 @@ public class Graph {
                 // Creating spacer space indicator.
                 textBuffer = sb.toString();
                 // Print tree node elements
-                for(heapNode n : curr) {
-                    result += textBuffer;
+                for(heapNode<T> n : curr) {
+                    result.append(textBuffer);
                     if(n == null) {
 
-                        result += "        ";
+                        result.append("        ");
                         next.add(null);
                         next.add(null);
                     } else {
                         if (n != null) {
-                            String some = String.format("(" + "%d" + "\033[1m" + ":%4d)" + "\033[0m", n.getValue().getId(), n.getKey()); // if we feel the need to change this just remove the '\003' part and delete the first % param
-                            result += some;
+                            String some = String.format("(" + "%d" + "\033[1m" + ":%4d)" + "\033[0m", (n.getValue() instanceof Node) ? ((Node) n.getValue()).getId() : 1 , n.getKey()); // if we feel the need to change this just remove the '\003' part and delete the first % param
+                            result.append(some);
                         }
                         else {
-                            result += "        ";
+                            result.append("        ");
                         }
                         if (rightChild(n.getPos()) <= getMaxIndex()) {
                             next.add(this.Heap[leftChild(n.getPos())]);
@@ -970,31 +971,31 @@ public class Graph {
                         }
 
                     }
-                    result += textBuffer;
+                    result.append(textBuffer);
                 }
-                result += "\n";
+                result.append("\n");
                 // Print tree node extensions for next level.
                 if(i < treeHeight - 1) {
-                    for(heapNode n : curr) {
-                        result += textBuffer;
+                    for(heapNode<T> n : curr) {
+                        result.append(textBuffer);
                         if(n == null) {
-                            result += "        ";}
+                            result.append("        ");}
                         else {
                             String some = String.format("%s      %s",
                                     leftChild(n.getPos()) <= getMaxIndex() ? (this.Heap[leftChild(n.getPos())] == null ? " " : "/") : "/", rightChild(n.getPos()) <= getMaxIndex() ? (this.Heap[rightChild(n.getPos())] == null ? " " : "\\") : "\\");
-                            result += some;
-                            result += textBuffer;
+                            result.append(some);
+                            result.append(textBuffer);
                         }
                     }
-                    result += "\n";
+                    result.append("\n");
                 }
                 // Renewing indicators for next run.
                 elements *= 2;
                 curr = next;
-                next = new ArrayList<heapNode>(elements);
+                next = new ArrayList<>(elements);
             }
-            result += "\n\n\n";
-            return result;
+            result.append("\n\n\n");
+            return result.toString();
         }
 
 
@@ -1002,9 +1003,9 @@ public class Graph {
         /**
          * the class used to implement the nodes of the Maximum-Heap.
          */
-        public class heapNode{
+        private class heapNode<V>{
             private int key;
-            private final Node value;
+            private final V value;
             private int pos;
 
             /**
@@ -1012,11 +1013,10 @@ public class Graph {
              * @param key
              * @param node
              */
-            public heapNode(int key, Node node, int pos){
+            public heapNode(int key, V node, int pos){
                 this.key = key;
                 this.value = node;
                 this.pos = pos;
-                node.setHeapForm(this);
             }
 
 
@@ -1025,7 +1025,7 @@ public class Graph {
              * the getter of the Graph-node which lies under the given heap-Node
              * @return
              */
-            public Node getValue() {
+            public V getValue() {
                 return value;
             }
 
@@ -1078,7 +1078,7 @@ public class Graph {
              */
             public void changeKey(int key){
                 this.setKey(key);
-                Heapify(this);
+                Heapify((heapNode<T>) this);
             }
         }
     }
