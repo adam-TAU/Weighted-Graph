@@ -191,12 +191,19 @@ public class Graph {
         result += "Maximum Neighbour Weight (the node's ID): " + maxNeighborhoodWeight().getId() + "\n";
         result += "Amount of Nodes in the Graph: " + getNumNodes() + "\n";
         result += "Amount of Edges in the Graph: " + getNumEdges() + "\n";
-        result += this.nodesHash.toString() + "\n".repeat(5);
+        result += this.nodesHash.toString() + repeat("\n",5);
         result += this.nodesHeap.toString();
         return result;
     }
 
 
+    private String repeat(String inp, int reps) {
+        String out = "";
+        for (int i = 0; i < reps; i++) {
+            out += inp;
+        }
+        return out;
+    }
 
 
     /**
@@ -564,14 +571,14 @@ public class Graph {
         public String toString(){
             String result = "";
             result = "HashMap's array size is: " + this.table.length + "\n";
-            result += "\t".repeat(this.table.length - 1) + "Hash-Map" + "\n";
-            result += "----".repeat(this.table.length*2) + "\n";
+            result += repeat("\t", this.table.length - 1) + "Hash-Map" + "\n";
+            result += repeat("----", this.table.length*2) + "\n";
 
-            result += "\t".repeat(this.table.length - 3) + "Number of nodes in the Graph: " + Graph.this.nodesHeap.getSize() + "\n";
-            result += "----".repeat(this.table.length*2) + "\n";
+            result += repeat("\t", this.table.length - 3) + "Number of nodes in the Graph: " + Graph.this.nodesHeap.getSize() + "\n";
+            result += repeat("----", this.table.length*2) + "\n";
 
-            result += "\t".repeat(this.table.length - 2) + "Columns taken: " + Arrays.asList(table).stream().filter(x -> x != null).mapToInt(x -> 1).sum() + "\n";
-            result += "----".repeat(this.table.length*2) + "\n";
+            result += repeat("\t", this.table.length - 2) + "Columns taken: " + Arrays.asList(table).stream().filter(x -> x != null).mapToInt(x -> 1).sum() + "\n";
+            result += repeat("----", this.table.length*2) + "\n";
 
             String textBuffer = "\t";
             hashCell[] tmpTable = this.table.clone();
@@ -923,8 +930,8 @@ public class Graph {
 
             int treeHeight = (int) (Math.log(this.getSize()) / Math.log(2)) + 1;
             int treeWidth = (int) Math.pow(2, treeHeight);
-            result += "\t".repeat(treeWidth/2 - 1) + "Maximum Heap\n";
-            result += "-".repeat(treeWidth*4) + "\n";
+            result += repeat("\t", treeWidth/2 - 1) + "Maximum Heap\n";
+            result += repeat("-", treeWidth*4) + "\n";
             List<heapNode> curr = new ArrayList<heapNode>(1), next = new ArrayList<heapNode>(2);
             curr.add(getMax());
             final int maxHalfLength = 4;
