@@ -880,7 +880,7 @@ public class Graph {
         public void Heapify(heapNode<T> node) {
             int pos = node.getPos();
 
-            while (pos > 0 && pos <= getMaxIndex()) {
+            while (pos >= 0 && pos <= getMaxIndex()) {
 
                 // if we need to heapify the node up
                 if (parent(pos) >= 0) {
@@ -901,6 +901,24 @@ public class Graph {
                     swap(pos, biggerchild);
                     pos = biggerchild;
                     continue;
+                } else {
+                    if (leftChild(pos) == biggerchild && rightChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a left child and is bigger than the parent
+                        if (Heap[pos].key < Heap[rightChild(pos)].key) {
+                            swap(pos, rightChild(pos));
+                            pos = rightChild(pos);
+                            continue;
+                        } else {
+                            break;
+                        }
+                    } else if (rightChild(pos) == biggerchild && leftChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a right child and is bigger than the parent
+                        if (Heap[pos].key < Heap[leftChild(pos)].key) {
+                            swap(pos, leftChild(pos));
+                            pos = leftChild(pos);
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
                 }
                 break;
             }

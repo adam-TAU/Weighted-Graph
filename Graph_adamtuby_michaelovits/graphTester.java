@@ -232,6 +232,7 @@ public class graphTester {
         graph.addEdge(1,3);
         graph.addEdge(7,6);
 
+        System.out.println(graph.toString());
         graph.deleteNode(9);
         System.out.println(graph.toString());
     }
