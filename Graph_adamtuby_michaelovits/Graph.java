@@ -879,15 +879,6 @@ public class Graph {
          */
         public void Heapify(heapNode<T> node) {
             int pos = node.getPos();
-            Heapify_Rec(pos);
-        }
-
-
-        /**
-         * this is the recursive-method that 'Heapify' wraps.
-         * @param pos the index at the Heap's array of the node we want to validate and Heapify.
-         */
-        private void Heapify_Rec(int pos){
 
             while (pos > 0 && pos <= getMaxIndex()) {
 
@@ -910,30 +901,10 @@ public class Graph {
                     swap(pos, biggerchild);
                     pos = biggerchild;
                     continue;
-                } else {
-                    if (leftChild(pos) == biggerchild && rightChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a left child and is bigger than the parent
-                        if (Heap[pos].key < Heap[rightChild(pos)].key) {
-                            swap(pos, rightChild(pos));
-                            pos = rightChild(pos);
-                            continue;
-                        } else {
-                            break;
-                        }
-                    } else if (rightChild(pos) == biggerchild && leftChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a right child and is bigger than the parent
-                        if (Heap[pos].key < Heap[leftChild(pos)].key) {
-                            swap(pos, leftChild(pos));
-                            pos = leftChild(pos);
-                            continue;
-                        } else {
-                            break;
-                        }
-                    }
                 }
                 break;
             }
         }
-
-
 
 
 
