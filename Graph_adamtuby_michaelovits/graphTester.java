@@ -169,9 +169,56 @@ public class graphTester {
 
 
     public static void main(String[] args){
+//        measurements();
         whatsappTest();
         firstTest();
     }
+
+
+
+
+    private static void measurements(){
+        Map<Integer, Integer> hashTable = new HashMap<>();
+
+        for (int i = 6; i<=21;i++){
+            // for i:
+            int n = (int)Math.pow(2,i);
+            Graph.Node[] nodes = new Graph.Node[n]; // vertices' array
+            for (int j = 1; j <=n;j++ ){  // generating those n vertices
+                nodes[j-1] = new Graph.Node(j , 1);
+            }
+            Graph g = new Graph(nodes); // generating the graph
+            int x;
+            int y;
+            HashMap<Set<Integer>, Integer> hash_table = new HashMap<>(); // hash table used to determine which edge is already in the graph
+            for(int k = 0;k<n;k++){ // generating n randomly selected edges
+                Random rand = new Random();
+                x = rand.nextInt(n)+1; // one vertice of the edge - P = 1/n, בלתי תלוי
+                y = rand.nextInt(n)+1; // second vertice of the edge - P = 1/n, בלתי תלוי
+                Set<Integer> hash_Set = new HashSet<>(); // the representation of the edge within a hash-set
+                hash_Set.add(x);
+                hash_Set.add(y);
+                if ((!hash_table.containsKey(hash_Set)) && (x!=y)){
+                    hash_table.put(hash_Set,1);
+                    //System.out.println(hash_Set);
+                    g.addEdge(x,y);
+                }
+            }
+
+            System.out.printf("%n%n%n" + "\033[1m" + "i = %d" + "\033[0m" + "%n", i);
+            System.out.printf("there are %d edges in the graph, while there are %d nodes in the graph%n", g.getNumEdges(), g.getNumNodes());
+            //System.out.println(g.maxHeap.Heap[1][0]-1);
+            Graph.Node maxVertice = g.maxNeighborhoodWeight();
+            System.out.printf("the vertice who holds the maximum neighborhood weight is of id: %d, and its rank is: %d%n%n", maxVertice.getId(), maxVertice.getVicinityWeight()-1);
+            //System.out.println(g.maxHeap.Heap.length-1);
+            hashTable.put(i, maxVertice.getVicinityWeight() - 1);
+        }
+
+        System.out.println(hashTable.entrySet());
+
+    }
+
+
 
 
     private static void whatsappTest(){
