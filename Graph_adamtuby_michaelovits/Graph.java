@@ -209,7 +209,6 @@ public class Graph {
     /**
      * This class represents a node in the graph.
      */
-    // todo: implement getters to the hashForm and heapForm
     public static class Node{
         private final int id;
         private final int weight;
@@ -438,6 +437,7 @@ public class Graph {
             if (length == 1) { // if the item is the only item in the list
                 this.head = null;
                 this.tail = null;
+                length = 0;
                 return;
             } else if (this.head == item) { // if the item is the head of the list
                 this.head = Next;

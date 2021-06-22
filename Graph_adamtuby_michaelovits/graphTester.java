@@ -170,13 +170,14 @@ public class graphTester {
 
     public static void main(String[] args){
         whatsappTest();
+        firstTest();
     }
 
 
     private static void whatsappTest(){
         graphTester T;
         // #1:
-        System.out.println("\nTest #2: (avg inputs)");
+        System.out.println("\nTest #1: (avg inputs)");
         T = new graphTester(1000);
         T.randomEdges(2000);
         System.out.println("Random edges' insertion succeeded!");
@@ -231,7 +232,6 @@ public class graphTester {
         graph.addEdge(1,3);
         graph.addEdge(7,6);
 
-        System.out.println(graph.toString());
         graph.deleteNode(9);
         System.out.println(graph.toString());
     }
