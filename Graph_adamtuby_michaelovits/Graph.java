@@ -677,7 +677,6 @@ public class Graph {
 
             /**
              * the constructor of a Cell in the Hash-Map.
-             * @param hash
              * @param key
              * @param value
              * @param next
@@ -729,10 +728,7 @@ public class Graph {
          * @param pos the index of the node in the Heap's array
          */
         private int parent(int pos) {
-            if (pos % 2 == 0) {
-                return pos / 2 - 1;
-            }
-            return Math.floorDiv(pos, 2);
+            return Math.floorDiv(pos+1,2 ) - 1;
         }
 
 
@@ -836,6 +832,9 @@ public class Graph {
             }
 
             do {
+                if (parent(curr) < 0) {
+                    break;
+                }
                 swap(curr, parent(curr));
                 curr = parent(curr);
                 if (curr == 0) {
@@ -857,7 +856,7 @@ public class Graph {
         public void deleteNode(heapNode<T> node){
             int pos = node.getPos();
 
-            if (size == 1 || isLeaf(pos)) {
+            if (size == 1 || pos == getMaxIndex()) {
                 Heap[--size] = null;
                 return;
             }
@@ -890,37 +889,47 @@ public class Graph {
          */
         private void Heapify_Rec(int pos){
 
-            // if we need to heapify the node up
-            if (pos != 0) {
-                if (Heap[pos].key > Heap[parent(pos)].key) {
-                    swap(pos, parent(pos));
-                    Heapify_Rec(parent(pos));
-                    return;
-                }
-            }
+            while (pos > 0 && pos <= getMaxIndex()) {
 
-
-            // if we need to heapify the node down
-            int biggerchild = biggerChild(pos);
-
-            if (biggerchild < 0) { // if the node doesn't have such thing as a 'biggerChild' (could result due to it being a leaf/non-node)
-                return;
-            } else if (Heap[pos].key < Heap[biggerchild].key) { // checking if we actually need to Heapify down the node
-                swap(pos, biggerchild);
-                Heapify_Rec(biggerchild);
-                return;
-            } else {
-                if (leftChild(pos) == biggerchild && rightChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a left child and is bigger than the parent
-                    if (Heap[pos].key < Heap[rightChild(pos)].key) {
-                        swap(pos, rightChild(pos));
-                        Heapify_Rec(rightChild(pos));
-                    }
-                } else if (rightChild(pos) == biggerchild && leftChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a right child and is bigger than the parent
-                    if (Heap[pos].key < Heap[leftChild(pos)].key) {
-                        swap(pos, leftChild(pos));
-                        Heapify_Rec(leftChild(pos));
+                // if we need to heapify the node up
+                if (parent(pos) >= 0) {
+                    if (Heap[pos].key > Heap[parent(pos)].key) {
+                        swap(pos, parent(pos));
+                        pos = parent(pos);
+                        continue;
                     }
                 }
+
+
+                // if we need to heapify the node down
+                int biggerchild = biggerChild(pos);
+
+                if (biggerchild < 0) { // if the node doesn't have such thing as a 'biggerChild' (could result due to it being a leaf/non-node)
+                    break;
+                } else if (Heap[pos].key < Heap[biggerchild].key) { // checking if we actually need to Heapify down the node
+                    swap(pos, biggerchild);
+                    pos = biggerchild;
+                    continue;
+                } else {
+                    if (leftChild(pos) == biggerchild && rightChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a left child and is bigger than the parent
+                        if (Heap[pos].key < Heap[rightChild(pos)].key) {
+                            swap(pos, rightChild(pos));
+                            pos = rightChild(pos);
+                            continue;
+                        } else {
+                            break;
+                        }
+                    } else if (rightChild(pos) == biggerchild && leftChild(pos) <= getMaxIndex()) { // if the the non-smaller child is a right child and is bigger than the parent
+                        if (Heap[pos].key < Heap[leftChild(pos)].key) {
+                            swap(pos, leftChild(pos));
+                            pos = leftChild(pos);
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                break;
             }
         }
 
