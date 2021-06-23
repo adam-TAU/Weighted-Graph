@@ -193,8 +193,8 @@ public class graphTester {
             HashMap<Set<Integer>, Integer> hash_table = new HashMap<>(); // hash table used to determine which edge is already in the graph
             for(int k = 0;k<n;k++){ // generating n randomly selected edges
                 Random rand = new Random();
-                x = rand.nextInt(n)+1; // one vertice of the edge - P = 1/n, בלתי תלוי
-                y = rand.nextInt(n)+1; // second vertice of the edge - P = 1/n, בלתי תלוי
+                x = rand.nextInt(n)+1; // one vertice of the edge - P = 1/n, independent
+                y = rand.nextInt(n)+1; // second vertice of the edge - P = 1/n, independent
                 Set<Integer> hash_Set = new HashSet<>(); // the representation of the edge within a hash-set
                 hash_Set.add(x);
                 hash_Set.add(y);
