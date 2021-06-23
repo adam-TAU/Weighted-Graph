@@ -188,7 +188,7 @@ public class Graph {
         String result = "";
         result += "\n\n\n\n";
         result += "Is the graph empty? " + (this.isEmpty() ? "Yes" : "Nope") + "\n";
-        result += "Maximum Neighbor Weight (the node's ID): " + maxNeighborhoodWeight().getId() + "\n";
+        result += "Maximum Neighbor Weight (the node's ID): " + (maxNeighborhoodWeight() != null ? maxNeighborhoodWeight().getId() : "null") + "\n";
         result += "Amount of Nodes in the Graph: " + getNumNodes() + "\n";
         result += "Amount of Edges in the Graph: " + getNumEdges() + "\n";
         result += this.nodesHash.toString() + repeat("\n",5);
@@ -639,7 +639,7 @@ public class Graph {
         @Override
         public String toString(){
             StringBuilder result;
-            result = new StringBuilder("HashMap's array size is: " + this.table.length + "\n");
+            result = new StringBuilder("HashMap's array size is: " + this.table.length + "\n\n");
             result.append(repeat("\t", this.table.length - 1)).append("Hash-Map").append("\n");
             result.append(repeat("----", this.table.length * 2)).append("\n");
 

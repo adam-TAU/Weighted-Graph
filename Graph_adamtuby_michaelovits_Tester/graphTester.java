@@ -169,6 +169,7 @@ public class graphTester {
 //        measurements();
         whatsappTest();
         firstTest();
+        secondTest();
     }
 
 
@@ -276,9 +277,22 @@ public class graphTester {
         graph.addEdge(1,3);
         graph.addEdge(7,6);
 
-        System.out.println(graph.toString());
         graph.deleteNode(9);
         System.out.println(graph.toString());
     }
 
+
+    private static void secondTest(){
+        Graph.Node[] nodes = new Graph.Node[2];
+        nodes[0] = new Graph.Node(1, 0);
+        nodes[1] = new Graph.Node(2, 0);
+
+        Graph graph = new Graph(nodes);
+
+        graph.addEdge(1,2);
+        graph.deleteNode(1);
+        graph.deleteNode(2);
+
+        System.out.println(graph.toString());
+    }
 }
