@@ -994,7 +994,7 @@ public class Graph {
                         next.add(null);
                         next.add(null);
                     } else {
-                        String some = String.format("(" + "%d" + "\033[1m" + ":%4d)" + "\033[0m", (n.getValue() instanceof Node) ? ((Node) n.getValue()).getId() : 1 , n.getKey()); // if we feel the need to change this just remove the '\003' part and delete the first % param
+                        String some = String.format("(" + "%d" + ":%4d)", (n.getValue() instanceof Node) ? ((Node) n.getValue()).getId() : 1 , n.getKey()); // if we feel the need to change this just remove the '\003' part and delete the first % param
                         result.append(some);
             
                         if (rightChild(n.getPos()) <= getMaxIndex()) {
