@@ -277,8 +277,21 @@ public class graphTester {
         graph.addEdge(1,3);
         graph.addEdge(7,6);
 
-        graph.deleteNode(9);
         System.out.println(graph.toString());
+        graph.deleteNode(9);
+        graph.deleteNode(10);
+        graph.deleteNode(1);
+        graph.deleteNode(5);
+        graph.deleteNode(6);
+        graph.deleteNode(3);
+        graph.deleteNode(2);
+        System.out.println(graph.toString());
+        graph.deleteNode(4);
+        graph.deleteNode(7);
+        System.out.println(graph.toString());
+        graph.deleteNode(8);
+        System.out.println(graph.toString());
+        System.out.println("first test ended");
     }
 
 
@@ -294,5 +307,6 @@ public class graphTester {
         graph.deleteNode(2);
 
         System.out.println(graph.toString());
+        System.out.println("second test ended");
     }
 }
