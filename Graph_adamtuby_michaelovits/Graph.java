@@ -9,19 +9,6 @@ You are allowed to add classes, methods, and members as required.
 import java.util.*;
 
 
-//\\ read carefully!!! //\\
-//\\ this is dedicated to both this assignment's Testers, and to the contributing students to go over and make sure the details below are correct !!! //\\
-/**
- * contributors' info and details:
- * @adam:
- * TAU-username: adamtuby
- * id: 215334822
- * @asaf:
- * TAU-username: michaelovits
- * id: 200637270
- */
-
-
 /**
  * This class represents a graph that efficiently maintains the heaviest neighborhood over edge addition and
  * vertex deletion.
